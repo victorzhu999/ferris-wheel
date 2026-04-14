@@ -1,0 +1,1074 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>摩天轮高度问题 - 交互式可视化</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        :root {
+            --neon-blue: #00f0ff;
+            --neon-purple: #bf00ff;
+            --neon-pink: #ff006e;
+            --neon-cyan: #00fff9;
+            --neon-yellow: #ffe600;
+            --glass-bg: rgba(8, 14, 32, 0.72);
+            --glass-border: rgba(100, 160, 255, 0.18);
+            --glow-blue: 0 0 15px rgba(0, 240, 255, 0.5), 0 0 45px rgba(0, 240, 255, 0.15);
+            --glow-purple: 0 0 15px rgba(191, 0, 255, 0.45), 0 0 50px rgba(191, 0, 255, 0.15);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #00040c;
+            min-height: 100vh;
+            padding: 20px;
+            color: #e0e7ff;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* 背景动态网格 */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(0, 240, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 240, 255, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* 背景光晕 */
+        body::after {
+            content: '';
+            position: fixed;
+            width: 600px;
+            height: 600px;
+            border-radius: 50%;
+            top: -150px;
+            left: -200px;
+            background: radial-gradient(circle, rgba(0, 240, 255, 0.08), rgba(191, 0, 255, 0.06) 40%, transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+            animation: floatOrb 20s ease-in-out infinite alternate;
+        }
+
+        @keyframes floatOrb {
+            0% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(200px, 100px) scale(1.15); }
+            100% { transform: translate(-150px, 300px) scale(0.9); }
+        }
+
+        .container { max-width: 1400px; margin: 0 auto; position: relative; z-index: 1; }
+
+        .header {
+            text-align: center;
+            margin-bottom: 28px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 32px 24px;
+            backdrop-filter: blur(24px);
+            box-shadow: var(--glow-blue), inset 0 0 50px rgba(0, 240, 255, 0.03);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -2px; left: -2px; right: -2px; bottom: -2px;
+            border-radius: 22px;
+            background: linear-gradient(135deg, var(--neon-blue), transparent 40%, transparent 60%, var(--neon-purple));
+            z-index: -1;
+            opacity: 0.6;
+            animation: borderGlow 6s ease-in-out infinite alternate;
+        }
+
+        .header::after {
+            content: '';
+            position: absolute;
+            top: 1px; left: 1px; right: 1px; bottom: 1px;
+            border-radius: 19px;
+            background: var(--glass-bg);
+            z-index: -1;
+        }
+
+        @keyframes borderGlow {
+            0% { opacity: 0.4; }
+            100% { opacity: 0.8; }
+        }
+
+        .header h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 32px;
+            font-weight: 900;
+            background: linear-gradient(90deg, var(--neon-cyan), var(--neon-blue), var(--neon-purple), var(--neon-pink));
+            background-size: 300% 300%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 40px rgba(0, 240, 255, 0.3);
+            animation: gradientShift 4s ease infinite;
+            letter-spacing: 2px;
+            margin-bottom: 12px;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .formula {
+            font-family: 'Orbitron', 'Courier New', monospace;
+            font-size: 18px;
+            background: rgba(0, 240, 255, 0.06);
+            border: 1px solid rgba(0, 240, 255, 0.2);
+            display: inline-block;
+            padding: 12px 28px;
+            border-radius: 12px;
+            color: var(--neon-cyan);
+            letter-spacing: 1px;
+            box-shadow: 0 0 10px rgba(0, 240, 255, 0.12);
+        }
+
+        .formula em {
+            font-style: normal;
+            color: var(--neon-pink);
+            font-weight: 700;
+            text-shadow: 0 0 8px rgba(255, 0, 110, 0.35);
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+
+        .panel {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 24px;
+            backdrop-filter: blur(24px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .panel::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--neon-cyan), transparent);
+            opacity: 0.5;
+        }
+
+        .panel h3 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--neon-blue);
+            margin-bottom: 16px;
+            padding-bottom: 10px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            border-bottom: 1px solid rgba(0, 240, 255, 0.12);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .panel h3::before {
+            content: '◆';
+            font-size: 10px;
+            color: var(--neon-cyan);
+            filter: drop-shadow(0 0 4px var(--neon-cyan));
+        }
+
+        #ferriswheel { width: 100%; height: 400px; border-radius: 12px; }
+
+        .chart-container { position: relative; height: 250px; margin-bottom: 16px; }
+
+        .result-box {
+            background: rgba(0, 240, 255, 0.04);
+            border: 1px solid rgba(0, 240, 255, 0.1);
+            border-radius: 14px;
+            padding: 18px;
+        }
+
+        .result-item { margin-bottom: 10px; line-height: 1.7; }
+        .result-item:last-child { margin-bottom: 0; }
+
+        .result-label {
+            font-weight: 600;
+            color: #94a3b8;
+        }
+
+        .result-value {
+            color: var(--neon-cyan);
+            font-weight: 600;
+            font-family: 'Orbitron', 'Courier New', monospace;
+            text-shadow: 0 0 6px rgba(0, 255, 249, 0.25);
+        }
+
+        .no-solution {
+            color: var(--neon-pink);
+            font-weight: 700;
+            text-shadow: 0 0 8px rgba(255, 0, 110, 0.3);
+        }
+
+        #conditionToggle {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: var(--neon-purple);
+            vertical-align: middle;
+            appearance: none;
+            background: rgba(0, 0, 0, 0.4);
+            border: 2px solid var(--neon-purple);
+            border-radius: 6px;
+            outline: none;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        #conditionToggle:checked {
+            background: var(--neon-purple);
+            box-shadow: 0 0 12px rgba(191, 0, 255, 0.5);
+        }
+
+        #conditionToggle:checked::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #fff;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        #conditionToggle:hover {
+            box-shadow: 0 0 16px rgba(191, 0, 255, 0.35);
+        }
+
+        #conditionToggle + span {
+            font-weight: 600;
+            color: #c7d2fe;
+            font-family: 'Orbitron', monospace;
+            font-size: 13px;
+            letter-spacing: 1px;
+        }
+
+        .controls {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 28px 24px;
+            margin-top: 24px;
+            backdrop-filter: blur(24px);
+            box-shadow: var(--glow-purple);
+            position: relative;
+        }
+
+        .controls::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--neon-purple), transparent);
+            opacity: 0.5;
+        }
+
+        .controls h2 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--neon-purple);
+            margin-bottom: 20px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .controls h2::before {
+            content: '◆';
+            font-size: 10px;
+            filter: drop-shadow(0 0 4px var(--neon-purple));
+        }
+
+        .control-group { display: flex; gap: 40px; flex-wrap: wrap; }
+        .control-item { flex: 1; min-width: 280px; }
+
+        .control-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+
+        .control-label > span:first-child {
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #94a3b8;
+        }
+
+        .control-value {
+            font-size: 24px;
+            font-weight: 900;
+            color: var(--neon-purple);
+            font-family: 'Orbitron', monospace;
+            text-shadow: 0 0 10px rgba(191, 0, 255, 0.4);
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: linear-gradient(90deg, rgba(191, 0, 255, 0.15), rgba(0, 240, 255, 0.15));
+            outline: none;
+            appearance: none;
+            cursor: pointer;
+            overflow: hidden;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            appearance: none;
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            background: #000;
+            cursor: pointer;
+            border: 3px solid var(--neon-purple);
+            box-shadow: 0 0 16px rgba(191, 0, 255, 0.5), inset 0 0 6px rgba(191, 0, 255, 0.3);
+            transition: all 0.2s;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            box-shadow: 0 0 20px rgba(191, 0, 255, 0.7), inset 0 0 8px rgba(191, 0, 255, 0.5);
+            transform: scale(1.1);
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            background: #000;
+            cursor: pointer;
+            border: 3px solid var(--neon-purple);
+            box-shadow: 0 0 16px rgba(191, 0, 255, 0.5), inset 0 0 6px rgba(191, 0, 255, 0.3);
+        }
+
+        @media (max-width: 900px) {
+            .main-content { grid-template-columns: 1fr; }
+            .header h1 { font-size: 24px; }
+        }
+        
+        /* canvas dark background */
+        canvas { background: transparent; }
+
+        /* Chart styling overrides */
+        .chartjs-wrap canvas {
+            border-radius: 12px;
+        }
+        
+        /* scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #00040c; }
+        ::-webkit-scrollbar-thumb { background: linear-gradient(var(--neon-cyan), var(--neon-purple)); border-radius: 3px; }
+    </style>
+</head>
+<body>
+    <!-- Floating particles layer -->
+    <canvas id="particles" style="position:fixed;inset:0;pointer-events:none;z-index:0;"></canvas>
+<div class="container">
+    <div class="header">
+        <h1>FERRIS WHEEL · 摩天轮高度问题</h1>
+        <div class="formula"><em>H</em> = <em>h</em> + <em>r</em> - <em>r</em>·cos(<em>t</em>)</div>
+    </div>
+
+    <div class="main-content">
+        <div class="panel">
+            <h3>摩天轮视图</h3>
+            <canvas id="ferriswheel" width="600" height="400"></canvas>
+        </div>
+
+        <div class="panel">
+            <h3>H-t 函数图象</h3>
+            <div class="chart-container">
+                <canvas id="heightChart"></canvas>
+            </div>
+            <div class="result-box">
+                <div class="result-item">
+                    <label><input type="checkbox" id="conditionToggle"> <span>H &gt; 18 / H &lt; 18</span></label>
+                </div>
+                <div id="resultContent"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="controls">
+        <h2>参数调节</h2>
+        <div class="control-group">
+            <div class="control-item">
+                <div class="control-label">
+                    <span>半径 r (m)</span>
+                    <span class="control-value" id="rValue">10</span>
+                </div>
+                <input type="range" id="rSlider" min="5" max="30" step="1" value="10">
+            </div>
+            <div class="control-item">
+                <div class="control-label">
+                    <span>底部高度 h (m)</span>
+                    <span class="control-value" id="hValue">2</span>
+                </div>
+                <input type="range" id="hSlider" min="0" max="25" step="0.5" value="2">
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// 背景粒子动画
+(function(){
+    const pc = document.getElementById('particles');
+    const pctx = pc.getContext('2d');
+    function resize(){ pc.width = innerWidth; pc.height = innerHeight; }
+    window.addEventListener('resize', resize);
+    resize();
+    const dots = [];
+    for(let i=0;i<80;i++){
+        dots.push({x:Math.random()*pc.width, y:Math.random()*pc.height, r:0.5+Math.random()*1.5, s:0.2+Math.random()*0.6, a:0.15+Math.random()*0.45});
+    }
+    function dp(){
+        pctx.clearRect(0,0,pc.width,pc.height);
+        dots.forEach(d=>{
+            d.y-=d.s;
+            if(d.y < -5){d.y=pc.height+5; d.x=Math.random()*pc.width;}
+            pctx.beginPath();
+            pctx.arc(d.x,d.y,d.r,0,Math.PI*2);
+            pctx.fillStyle='rgba(0,240,255,'+d.a+')';
+            pctx.shadowColor='rgba(0,240,255,'+d.a+')';
+            pctx.shadowBlur=6;
+            pctx.fill();
+        });
+        requestAnimationFrame(dp);
+    }
+    dp();
+})();
+
+const rSlider = document.getElementById('rSlider');
+const hSlider = document.getElementById('hSlider');
+const rValueEl = document.getElementById('rValue');
+const hValueEl = document.getElementById('hValue');
+const resultContent = document.getElementById('resultContent');
+const conditionToggle = document.getElementById('conditionToggle');
+
+const THRESHOLD = 18;
+
+function H(t, r, h) {
+    return h + r - r * Math.cos(t);
+}
+
+function isConditionMet(hVal) {
+    return conditionToggle.checked ? (hVal < THRESHOLD) : (hVal > THRESHOLD);
+}
+
+function calculateIntervals(r, h) {
+    const rhs = (h + r - THRESHOLD) / r;
+
+    if (conditionToggle.checked) {
+        if (rhs <= -1) return [];
+        if (rhs >= 1) return [[0, 2 * Math.PI], [2 * Math.PI, 4 * Math.PI]];
+        const t0 = Math.acos(rhs);
+        return [
+            [0, t0], [2 * Math.PI - t0, 2 * Math.PI],
+            [2 * Math.PI, 2 * Math.PI + t0], [4 * Math.PI - t0, 4 * Math.PI]
+        ];
+    } else {
+        if (rhs >= 1) return [];
+        if (rhs <= -1) return [[0, 2 * Math.PI], [2 * Math.PI, 4 * Math.PI]];
+        const t0 = Math.acos(rhs);
+        return [
+            [t0, 2 * Math.PI - t0],
+            [2 * Math.PI + t0, 4 * Math.PI - t0]
+        ];
+    }
+}
+
+function updateResults(r, h) {
+    const intervals = calculateIntervals(r, h);
+    const condText = conditionToggle.checked ? 'H < 18' : 'H > 18';
+
+    if (intervals.length === 0) {
+        resultContent.innerHTML =
+            '<div class="result-item"><span class="result-label">计算结果：</span>' +
+            '<span class="no-solution">无满足条件的 t 值</span></div>' +
+            '<div class="result-item">说明：当前参数下，摩天轮高度始终不符合 ' + condText + '</div>';
+        return;
+    }
+
+    let html = '<div class="result-item"><span class="result-label">计算结果（' + condText + '）：</span></div>';
+    
+    const merged = [];
+    for (let i = 0; i < intervals.length; i++) {
+        if (merged.length > 0 && Math.abs(intervals[i][0] - merged[merged.length-1][1]) < 0.0001) {
+            merged[merged.length-1][1] = intervals[i][1];
+        } else {
+            merged.push([intervals[i][0], intervals[i][1]]);
+        }
+    }
+
+    merged.forEach(function(interval, idx) {
+        const start = interval[0].toFixed(4);
+        const end = interval[1].toFixed(4);
+        html += '<div class="result-item">' +
+            '<span class="result-value">t ∈ (' + start + ', ' + end + ')</span>' +
+            (idx < 2 ? ' (第' + (idx + 1) + '个周期)' : '') +
+            '</div>';
+    });
+
+    const maxH = h + 2 * r;
+    html += '<div class="result-item"><span class="result-label">当前参数：</span>' +
+        '<span class="result-value">r = ' + r + ', h = ' + h + '</span></div>';
+    html += '<div class="result-item"><span class="result-label">高度范围：</span>' +
+        '<span class="result-value">[' + h + ', ' + maxH.toFixed(1) + '] m</span></div>';
+
+    resultContent.innerHTML = html;
+}
+
+let rotationAngle = 0;
+
+function drawFerrisWheel(r, h) {
+    const canvas = document.getElementById('ferriswheel');
+    const ctx = canvas.getContext('2d');
+    const w = canvas.width;
+    const hCanvas = canvas.height;
+
+    ctx.clearRect(0, 0, w, hCanvas);
+
+    // 深色背景匹配页面
+    ctx.fillStyle = '#060b18';
+    ctx.fillRect(0, 0, w, hCanvas);
+
+    const maxH = Math.max(h + 2 * r, 20);
+    const padding = 50;
+    const scaleY = (hCanvas - 2 * padding) / maxH;
+    const groundY = hCanvas - padding;
+
+    // 夜景星空
+    for (let i = 0; i < 80; i++) {
+        const sx = ((i * 137 + 43) % w);
+        const sy = ((i * 97 + 23) % (groundY * 0.75));
+        const size = 0.5 + (i % 3) * 0.5;
+        const alpha = 0.3 + (i % 4) * 0.15;
+        ctx.fillStyle = 'rgba(200, 210, 255, ' + alpha + ')';
+        ctx.beginPath();
+        ctx.arc(sx, sy, size, 0, 2 * Math.PI);
+        ctx.fill();
+    }
+
+    // 霓虹月亮
+    ctx.fillStyle = '#c084fc';
+    ctx.shadowColor = '#c084fc';
+    ctx.shadowBlur = 24;
+    ctx.beginPath();
+    ctx.arc(w - 55, 50, 18, 0, 2 * Math.PI);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = '#060b18';
+    ctx.beginPath();
+    ctx.arc(w - 48, 45, 13, 0, 2 * Math.PI);
+    ctx.fill();
+
+    // 地面
+    const grd = ctx.createLinearGradient(0, groundY, 0, hCanvas);
+    grd.addColorStop(0, '#12192b');
+    grd.addColorStop(1, '#060b18');
+    ctx.fillStyle = grd;
+    ctx.fillRect(0, groundY, w, hCanvas - groundY);
+
+    // 草地霓虹
+    for (let gx = 0; gx < w; gx += 8) {
+        const grassH = 4 + Math.sin(gx * 0.3) * 3;
+        ctx.fillStyle = '#00f0ff';
+        ctx.shadowColor = '#00f0ff';
+        ctx.shadowBlur = 4;
+        ctx.globalAlpha = 0.35;
+        ctx.beginPath();
+        ctx.moveTo(gx, groundY);
+        ctx.lineTo(gx + 2, groundY - grassH);
+        ctx.lineTo(gx + 4, groundY);
+        ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+    ctx.shadowBlur = 0;
+
+    const centerY = groundY - (h + r) * scaleY;
+    const centerX = w / 2;
+    const R = r * scaleY;
+
+    // 支架（霓虹橙）
+    const legSpread = Math.max(30, R * 0.3);
+    const legGrad = ctx.createLinearGradient(0, centerY, 0, groundY);
+    legGrad.addColorStop(0, '#ff006e');
+    legGrad.addColorStop(1, '#bf00ff');
+
+    ctx.strokeStyle = legGrad;
+    ctx.lineWidth = 7;
+    ctx.lineCap = 'round';
+    ctx.shadowColor = 'rgba(255, 0, 110, 0.5)';
+    ctx.shadowBlur = 14;
+    ctx.beginPath();
+    ctx.moveTo(centerX + legSpread * 0.7, groundY);
+    ctx.lineTo(centerX - legSpread * 0.6, groundY);
+    ctx.lineTo(centerX, centerY);
+    ctx.closePath();
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(centerX - legSpread * 0.5, groundY);
+    ctx.lineTo(centerX + legSpread * 0.55, groundY);
+    ctx.lineTo(centerX, centerY);
+    ctx.closePath();
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+
+    // 主圆环 - 多层霓虹
+    // 外发光
+    ctx.strokeStyle = 'rgba(0, 240, 255, 0.25)';
+    ctx.lineWidth = 12;
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, R, 0, 2 * Math.PI);
+    ctx.stroke();
+
+    // 轨道主体
+    ctx.strokeStyle = '#00f0ff';
+    ctx.lineWidth = 5;
+    ctx.shadowColor = '#00f0ff';
+    ctx.shadowBlur = 16;
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, R, 0, 2 * Math.PI);
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+
+    // 内圈环
+    const rings = [
+        { radius: R * 0.65, color: '#bf00ff', width: 2.5 },
+        { radius: R * 0.4, color: '#ff006e', width: 2 },
+        { radius: R * 0.18, color: '#00fff9', width: 1.5 }
+    ];
+    rings.forEach(function(ring) {
+        ctx.strokeStyle = ring.color;
+        ctx.shadowColor = ring.color;
+        ctx.shadowBlur = 8;
+        ctx.lineWidth = ring.width;
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, ring.radius, 0, 2 * Math.PI);
+        ctx.stroke();
+    });
+    ctx.shadowBlur = 0;
+
+    // 主辐条
+    const spokeCount = 16;
+    for (let i = 0; i < spokeCount; i++) {
+        const angle = rotationAngle + (2 * Math.PI * i / spokeCount);
+        const endX = centerX + R * Math.cos(angle);
+        const endY = centerY + R * Math.sin(angle);
+        const spokeGrad = ctx.createLinearGradient(centerX, centerY, endX, endY);
+        spokeGrad.addColorStop(0, '#00fff9');
+        spokeGrad.addColorStop(0.4, '#00f0ff');
+        spokeGrad.addColorStop(1, '#bf00ff');
+        ctx.strokeStyle = spokeGrad;
+        ctx.lineWidth = 1.8;
+        ctx.shadowColor = 'rgba(0, 240, 255, 0.4)';
+        ctx.shadowBlur = 6;
+        ctx.beginPath();
+        ctx.moveTo(centerX, centerY);
+        ctx.lineTo(endX, endY);
+        ctx.stroke();
+    }
+    ctx.shadowBlur = 0;
+
+    // 交叉支撑
+    const crossBraces = 8;
+    ctx.strokeStyle = 'rgba(191, 0, 255, 0.35)';
+    ctx.lineWidth = 1.2;
+    for (let i = 0; i < crossBraces; i++) {
+        const a1 = rotationAngle + (2 * Math.PI * i / crossBraces);
+        const a2 = rotationAngle + (2 * Math.PI * (i + 1) / crossBraces);
+        const rMid = R * 0.55;
+        ctx.beginPath();
+        ctx.moveTo(centerX + rMid * Math.cos(a1), centerY + rMid * Math.sin(a1));
+        ctx.lineTo(centerX + R * 0.85 * Math.cos(a2), centerY + R * 0.85 * Math.sin(a2));
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(centerX + rMid * Math.cos(a2), centerY + rMid * Math.sin(a2));
+        ctx.lineTo(centerX + R * 0.85 * Math.cos(a1), centerY + R * 0.85 * Math.sin(a1));
+        ctx.stroke();
+    }
+
+    // 内部半透明填充
+    ctx.fillStyle = 'rgba(6, 11, 24, 0.5)';
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, R, 0, 2 * Math.PI);
+    ctx.fill();
+
+    // 霓虹LED灯
+    const lightCount = 36;
+    const time = Date.now() * 0.0015;
+    for (let i = 0; i < lightCount; i++) {
+        const angle = (2 * Math.PI * i / lightCount) + time * 0.3;
+        const lx = centerX + (R + 10) * Math.cos(angle);
+        const ly = centerY + (R + 10) * Math.sin(angle);
+        const hue = (time * 60 + i * 10) % 360;
+        ctx.fillStyle = 'hsl(' + hue + ', 95%, 65%)';
+        ctx.shadowColor = 'hsl(' + hue + ', 95%, 65%)';
+        ctx.shadowBlur = 8;
+        ctx.beginPath();
+        ctx.arc(lx, ly, 3.5, 0, 2 * Math.PI);
+        ctx.fill();
+    }
+    ctx.shadowBlur = 0;
+
+    // 座舱 - 霓虹风格
+    const cabinColors = [
+        { glow: '#00f0ff', body: '#0ea5e9' },
+        { glow: '#ff006e', body: '#e11d48' },
+        { glow: '#ffe600', body: '#eab308' },
+        { glow: '#00fff9', body: '#14b8a6' },
+        { glow: '#bf00ff', body: '#a855f7' },
+        { glow: '#ff5c00', body: '#ea580c' },
+        { glow: '#00f0ff', body: '#06b6d4' },
+        { glow: '#ff00aa', body: '#db2777' }
+    ];
+    const numCabins = 8;
+    for (let i = 0; i < numCabins; i++) {
+        const spokeAngle = rotationAngle + (2 * Math.PI * i / numCabins);
+        const cx = centerX + R * Math.cos(spokeAngle);
+        const cy = centerY + R * Math.sin(spokeAngle);
+        const cColor = cabinColors[i];
+
+        // 吊杆
+        ctx.strokeStyle = 'rgba(150,160,200,0.6)';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(cx, cy + 2);
+        ctx.lineTo(cx, cy + 14);
+        ctx.stroke();
+
+        // 座舱外发光
+        ctx.shadowColor = cColor.glow;
+        ctx.shadowBlur = 10;
+
+        // 座舱主体
+        ctx.fillStyle = cColor.body;
+        ctx.beginPath();
+        ctx.roundRect(cx - 11, cy + 14, 22, 16, 4);
+        ctx.fill();
+
+        ctx.shadowBlur = 0;
+
+        // 座舱边框
+        ctx.strokeStyle = cColor.glow;
+        ctx.lineWidth = 1.2;
+        ctx.shadowColor = cColor.glow;
+        ctx.shadowBlur = 6;
+        ctx.beginPath();
+        ctx.roundRect(cx - 11, cy + 14, 22, 16, 4);
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+
+        // 窗户高光
+        ctx.fillStyle = 'rgba(255,255,255,0.2)';
+        ctx.beginPath();
+        ctx.roundRect(cx - 8, cy + 16, 16, 7, 2);
+        ctx.fill();
+    }
+
+    // 中心轴
+    ctx.fillStyle = '#060b18';
+    ctx.shadowColor = '#00f0ff';
+    ctx.shadowBlur = 12;
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, 14, 0, 2 * Math.PI);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+    ctx.strokeStyle = '#00f0ff';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, 14, 0, 2 * Math.PI);
+    ctx.stroke();
+    ctx.fillStyle = '#bf00ff';
+    ctx.shadowColor = '#bf00ff';
+    ctx.shadowBlur = 8;
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, 7, 0, 2 * Math.PI);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = '#00fff9';
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, 3, 0, 2 * Math.PI);
+    ctx.fill();
+
+    // H_max 霓虹标注
+    const topH = h + 2 * r;
+    const topY = groundY - topH * scaleY;
+    ctx.strokeStyle = 'rgba(0, 255, 249, 0.4)';
+    ctx.lineWidth = 1.5;
+    ctx.setLineDash([6, 4]);
+    ctx.beginPath();
+    ctx.moveTo(centerX + R + 25, topY);
+    ctx.lineTo(w - 10, topY);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = '#00fff9';
+    ctx.shadowColor = '#00fff9';
+    ctx.shadowBlur = 6;
+    ctx.font = 'bold 12px "Orbitron", sans-serif';
+    ctx.textAlign = 'left';
+    ctx.fillText('H_max = ' + topH.toFixed(0) + ' m', w - 155, topY + 4);
+    ctx.shadowBlur = 0;
+
+    // H_min 霓虹标注
+    if (h > 0) {
+        const minY = groundY - h * scaleY;
+        ctx.strokeStyle = 'rgba(255, 92, 0, 0.4)';
+        ctx.lineWidth = 1.5;
+        ctx.setLineDash([6, 4]);
+        ctx.beginPath();
+        ctx.moveTo(centerX + R + 25, minY);
+        ctx.lineTo(w - 10, minY);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.fillStyle = '#ff5c00';
+        ctx.shadowColor = '#ff5c00';
+        ctx.shadowBlur = 6;
+        ctx.fillText('H_min = ' + h.toFixed(0) + ' m', w - 155, minY + 4);
+        ctx.shadowBlur = 0;
+    }
+
+    // H=18 霓虹阈值线
+    const thresholdY = groundY - THRESHOLD * scaleY;
+    if (thresholdY > 10 && thresholdY < groundY) {
+        ctx.strokeStyle = '#ff006e';
+        ctx.shadowColor = '#ff006e';
+        ctx.shadowBlur = 10;
+        ctx.lineWidth = 2;
+        ctx.setLineDash([12, 6]);
+        ctx.beginPath();
+        ctx.moveTo(10, thresholdY);
+        ctx.lineTo(w - 10, thresholdY);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.shadowBlur = 0;
+
+        ctx.fillStyle = '#060b18';
+        ctx.strokeStyle = '#ff006e';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.rect(w - 55, thresholdY - 10, 48, 18);
+        ctx.fill();
+        ctx.shadowColor = '#ff006e';
+        ctx.shadowBlur = 6;
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+        ctx.fillStyle = '#ff006e';
+        ctx.font = 'bold 11px "Orbitron", sans-serif';
+        ctx.fillText('18', w - 46, thresholdY + 3);
+    }
+}
+
+function animate() {
+    rotationAngle += 0.004;
+    const r = parseFloat(rSlider.value);
+    const h = parseFloat(hSlider.value);
+    drawFerrisWheel(r, h);
+    requestAnimationFrame(animate);
+}
+
+let heightChart;
+
+function initChart() {
+    const ctx = document.getElementById('heightChart').getContext('2d');
+
+    heightChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: [],
+            datasets: [{
+                label: 'H(t)',
+                borderColor: '#00f0ff',
+                borderWidth: 2.5,
+                pointRadius: 0,
+                fill: true,
+                backgroundColor: function(context) {
+                    const chart = context.chart;
+                    const {ctx: c, chartArea} = chart;
+                    if(!chartArea) return null;
+                    const grad = c.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+                    grad.addColorStop(0, 'rgba(0, 240, 255, 0.25)');
+                    grad.addColorStop(0.5, 'rgba(191, 0, 255, 0.1)');
+                    grad.addColorStop(1, 'rgba(6, 11, 24, 0)');
+                    return grad;
+                },
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: true, position: 'top', labels: { color: '#94a3b8', font: { family: 'Orbitron', size: 11 } } },
+                tooltip: {
+                    enabled: true,
+                    callbacks: {
+                        label: function(context) {
+                            return 'H = ' + context.parsed.y.toFixed(2) + ' m';
+                        }
+                    },
+                    backgroundColor: 'rgba(6, 11, 24, 0.9)',
+                    borderColor: '#00f0ff',
+                    borderWidth: 1,
+                    titleColor: '#00f0ff',
+                    bodyColor: '#e0e7ff',
+                    titleFont: { family: 'Orbitron', size: 12 }
+                }
+            },
+            scales: {
+                x: {
+                    title: { display: true, text: 't', color: '#64748b', font: { family: 'Orbitron' } },
+                    ticks: {
+                        color: '#64748b',
+                        font: { size: 10 },
+                        callback: function(value) {
+                            return (value / Math.PI).toFixed(1) + 'π';
+                        }
+                    },
+                    grid: { color: 'rgba(100,116,139,0.1)' }
+                },
+                y: {
+                    title: { display: true, text: 'H (m)', color: '#64748b', font: { family: 'Orbitron' } },
+                    beginAtZero: false,
+                    min: 0,
+                    ticks: { color: '#64748b', font: { size: 10 } },
+                    grid: { color: 'rgba(100,116,139,0.1)' }
+                }
+            }
+        },
+        plugins: [{
+            id: 'thresholdLine',
+            beforeDraw: function(chart) {
+                const ctx = chart.ctx;
+                const yScale = chart.scales.y;
+                const xScale = chart.scales.x;
+                const y = yScale.getPixelForValue(THRESHOLD);
+                if (y >= yScale.top && y <= yScale.bottom) {
+                    ctx.save();
+                    ctx.strokeStyle = '#ff006e';
+                    ctx.lineWidth = 2;
+                    ctx.shadowColor = '#ff006e';
+                    ctx.shadowBlur = 8;
+                    ctx.setLineDash([8, 5]);
+                    ctx.beginPath();
+                    ctx.moveTo(xScale.left, y);
+                    ctx.lineTo(xScale.right, y);
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+                    ctx.shadowBlur = 0;
+                    ctx.font = 'bold 11px "Orbitron", sans-serif';
+                    ctx.fillStyle = '#ff006e';
+                    ctx.textAlign = 'left';
+                    ctx.fillText('18', xScale.right - 30, y - 6);
+                    ctx.restore();
+                }
+            }
+        }, {
+            id: 'highlightAbove',
+            beforeDraw: function(chart) {
+                const ctx = chart.ctx;
+                const yScale = chart.scales.y;
+                const xScale = chart.scales.x;
+                const dataset = chart.data.datasets[0].data;
+                const labels = chart.data.labels;
+                const yThresh = yScale.getPixelForValue(THRESHOLD);
+
+                ctx.save();
+                let inRegion = false;
+                let startX = null;
+
+                for (let i = 0; i < labels.length; i++) {
+                    const x = xScale.getPixelForValue(labels[i]);
+                    const hVal = dataset[i];
+                    const meetsCondition = conditionToggle.checked ? (hVal < THRESHOLD) : (hVal > THRESHOLD);
+
+                    if (meetsCondition && !inRegion) {
+                        startX = x;
+                        inRegion = true;
+                    } else if ((!meetsCondition || i === labels.length - 1) && inRegion) {
+                        if (conditionToggle.checked) {
+                            ctx.fillStyle = 'rgba(255, 0, 110, 0.12)';
+                            ctx.fillRect(startX, yThresh, x - startX, yScale.bottom - yThresh);
+                        } else {
+                            ctx.fillStyle = 'rgba(0, 255, 249, 0.1)';
+                            ctx.fillRect(startX, yScale.top, x - startX, yThresh - yScale.top);
+                        }
+                        inRegion = false;
+                    }
+                }
+                ctx.restore();
+            }
+        }]
+    });
+}
+
+function updateChart(r, h) {
+    const tValues = [];
+    const hValues = [];
+    const numPoints = 300;
+
+    for (let i = 0; i <= numPoints; i++) {
+        const t = (4 * Math.PI * i) / numPoints;
+        tValues.push(t);
+        hValues.push(H(t, r, h));
+    }
+
+    heightChart.data.labels = tValues;
+    heightChart.data.datasets[0].data = hValues;
+    const maxH = Math.max(h + 2 * r, THRESHOLD + 2);
+    heightChart.options.scales.y.max = maxH;
+    heightChart.update('none');
+}
+
+function updateAll() {
+    const r = parseFloat(rSlider.value);
+    const h = parseFloat(hSlider.value);
+    rValueEl.textContent = r;
+    hValueEl.textContent = h;
+    updateResults(r, h);
+    updateChart(r, h);
+}
+
+rSlider.addEventListener('input', updateAll);
+conditionToggle.addEventListener('change', updateAll);
+hSlider.addEventListener('input', updateAll);
+
+window.addEventListener('load', function() {
+    initChart();
+    updateAll();
+    animate();
+});
+</script>
+</body>
+</html>
