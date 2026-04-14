@@ -13,8 +13,8 @@
             --neon-pink: #ff006e;
             --neon-cyan: #00fff9;
             --neon-yellow: #ffe600;
-            --glass-bg: rgba(8, 14, 32, 0.72);
-            --glass-border: rgba(100, 160, 255, 0.18);
+            --glass-bg: rgba(30, 40, 80, 0.55);
+            --glass-border: rgba(150, 200, 255, 0.25);
             --glow-blue: 0 0 15px rgba(0, 240, 255, 0.5), 0 0 45px rgba(0, 240, 255, 0.15);
             --glow-purple: 0 0 15px rgba(191, 0, 255, 0.45), 0 0 50px rgba(191, 0, 255, 0.15);
         }
@@ -23,10 +23,10 @@
 
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: #00040c;
+            background: linear-gradient(160deg, #0f172a 0%, #1e1b4b 40%, #171033 70%, #0c1524 100%);
             min-height: 100vh;
             padding: 20px;
-            color: #e0e7ff;
+            color: #f1f5f9;
             overflow-x: hidden;
             position: relative;
         }
@@ -37,8 +37,8 @@
             position: fixed;
             inset: 0;
             background-image:
-                linear-gradient(rgba(0, 240, 255, 0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0, 240, 255, 0.03) 1px, transparent 1px);
+                linear-gradient(rgba(150, 200, 255, 0.06) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(150, 200, 255, 0.06) 1px, transparent 1px);
             background-size: 50px 50px;
             pointer-events: none;
             z-index: 0;
@@ -48,12 +48,12 @@
         body::after {
             content: '';
             position: fixed;
-            width: 600px;
-            height: 600px;
+            width: 700px;
+            height: 700px;
             border-radius: 50%;
             top: -150px;
             left: -200px;
-            background: radial-gradient(circle, rgba(0, 240, 255, 0.08), rgba(191, 0, 255, 0.06) 40%, transparent 70%);
+            background: radial-gradient(circle, rgba(100, 180, 255, 0.12), rgba(191, 0, 255, 0.08) 40%, transparent 70%);
             pointer-events: none;
             z-index: 0;
             animation: floatOrb 20s ease-in-out infinite alternate;
@@ -128,14 +128,14 @@
         .formula {
             font-family: 'Orbitron', 'Courier New', monospace;
             font-size: 18px;
-            background: rgba(0, 240, 255, 0.06);
-            border: 1px solid rgba(0, 240, 255, 0.2);
+            background: rgba(100, 180, 255, 0.1);
+            border: 1px solid rgba(150, 200, 255, 0.25);
             display: inline-block;
             padding: 12px 28px;
             border-radius: 12px;
-            color: var(--neon-cyan);
+            color: #e0f2fe;
             letter-spacing: 1px;
-            box-shadow: 0 0 10px rgba(0, 240, 255, 0.12);
+            box-shadow: 0 0 15px rgba(100, 180, 255, 0.15);
         }
 
         .formula em {
@@ -198,8 +198,8 @@
         .chart-container { position: relative; height: 250px; margin-bottom: 16px; }
 
         .result-box {
-            background: rgba(0, 240, 255, 0.04);
-            border: 1px solid rgba(0, 240, 255, 0.1);
+            background: rgba(100, 180, 255, 0.06);
+            border: 1px solid rgba(100, 200, 255, 0.15);
             border-radius: 14px;
             padding: 18px;
         }
@@ -209,7 +209,7 @@
 
         .result-label {
             font-weight: 600;
-            color: #94a3b8;
+            color: #cbd5e1;
         }
 
         .result-value {
@@ -232,8 +232,8 @@
             accent-color: var(--neon-purple);
             vertical-align: middle;
             appearance: none;
-            background: rgba(0, 0, 0, 0.4);
-            border: 2px solid var(--neon-purple);
+            background: rgba(30, 40, 80, 0.5);
+            border: 2px solid rgba(191, 0, 255, 0.6);
             border-radius: 6px;
             outline: none;
             transition: all 0.2s;
@@ -262,7 +262,7 @@
 
         #conditionToggle + span {
             font-weight: 600;
-            color: #c7d2fe;
+            color: #f1f5f9;
             font-family: 'Orbitron', monospace;
             font-size: 13px;
             letter-spacing: 1px;
@@ -322,7 +322,7 @@
             font-size: 13px;
             text-transform: uppercase;
             letter-spacing: 1px;
-            color: #94a3b8;
+            color: #cbd5e1;
         }
 
         .control-value {
@@ -337,7 +337,7 @@
             width: 100%;
             height: 8px;
             border-radius: 4px;
-            background: linear-gradient(90deg, rgba(191, 0, 255, 0.15), rgba(0, 240, 255, 0.15));
+            background: linear-gradient(90deg, rgba(191, 0, 255, 0.25), rgba(0, 240, 255, 0.25));
             outline: none;
             appearance: none;
             cursor: pointer;
@@ -349,26 +349,26 @@
             width: 26px;
             height: 26px;
             border-radius: 50%;
-            background: #000;
+            background: #1e293b;
             cursor: pointer;
             border: 3px solid var(--neon-purple);
-            box-shadow: 0 0 16px rgba(191, 0, 255, 0.5), inset 0 0 6px rgba(191, 0, 255, 0.3);
+            box-shadow: 0 0 16px rgba(191, 0, 255, 0.6), inset 0 0 8px rgba(191, 0, 255, 0.3);
             transition: all 0.2s;
         }
 
         input[type="range"]::-webkit-slider-thumb:hover {
-            box-shadow: 0 0 20px rgba(191, 0, 255, 0.7), inset 0 0 8px rgba(191, 0, 255, 0.5);
-            transform: scale(1.1);
+            box-shadow: 0 0 24px rgba(191, 0, 255, 0.8), inset 0 0 10px rgba(191, 0, 255, 0.5);
+            transform: scale(1.15);
         }
 
         input[type="range"]::-moz-range-thumb {
             width: 26px;
             height: 26px;
             border-radius: 50%;
-            background: #000;
+            background: #1e293b;
             cursor: pointer;
             border: 3px solid var(--neon-purple);
-            box-shadow: 0 0 16px rgba(191, 0, 255, 0.5), inset 0 0 6px rgba(191, 0, 255, 0.3);
+            box-shadow: 0 0 16px rgba(191, 0, 255, 0.6), inset 0 0 8px rgba(191, 0, 255, 0.3);
         }
 
         @media (max-width: 900px) {
@@ -386,7 +386,7 @@
         
         /* scrollbar */
         ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: #00040c; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
         ::-webkit-scrollbar-thumb { background: linear-gradient(var(--neon-cyan), var(--neon-purple)); border-radius: 3px; }
     </style>
 </head>
@@ -412,7 +412,7 @@
             </div>
             <div class="result-box">
                 <div class="result-item">
-                    <label><input type="checkbox" id="conditionToggle"> <span>H &gt; 18 / H &lt; 18</span></label>
+                    <label><input type="checkbox" id="conditionToggle"> <span>A: H > 18  /  B: H < 18</span></label>
                 </div>
                 <div id="resultContent"></div>
             </div>
@@ -450,7 +450,7 @@
     resize();
     const dots = [];
     for(let i=0;i<80;i++){
-        dots.push({x:Math.random()*pc.width, y:Math.random()*pc.height, r:0.5+Math.random()*1.5, s:0.2+Math.random()*0.6, a:0.15+Math.random()*0.45});
+        dots.push({x:Math.random()*pc.width, y:Math.random()*pc.height, r:0.8+Math.random()*1.8, s:0.3+Math.random()*0.8, a:0.25+Math.random()*0.55});
     }
     function dp(){
         pctx.clearRect(0,0,pc.width,pc.height);
@@ -488,40 +488,60 @@ function isConditionMet(hVal) {
 
 function calculateIntervals(r, h) {
     const rhs = (h + r - THRESHOLD) / r;
-
+    
+    if (rhs > 1 || rhs < -1) {
+        return { intervals: [], tValues: [], hasSolution: false };
+    }
+    
+    const t0 = Math.acos(rhs);
+    const tValues = [t0, 2 * Math.PI - t0];
+    
     if (conditionToggle.checked) {
-        if (rhs <= -1) return [];
-        if (rhs >= 1) return [[0, 2 * Math.PI], [2 * Math.PI, 4 * Math.PI]];
-        const t0 = Math.acos(rhs);
-        return [
-            [0, t0], [2 * Math.PI - t0, 2 * Math.PI],
-            [2 * Math.PI, 2 * Math.PI + t0], [4 * Math.PI - t0, 4 * Math.PI]
-        ];
+        if (rhs <= -1) return { intervals: [], tValues, hasSolution: false };
+        if (rhs >= 1) return { intervals: [[0, 2*Math.PI]], tValues, hasSolution: true };
+        return {
+            intervals: [[0, t0], [2*Math.PI-t0, 2*Math.PI]],
+            tValues,
+            hasSolution: true
+        };
     } else {
-        if (rhs >= 1) return [];
-        if (rhs <= -1) return [[0, 2 * Math.PI], [2 * Math.PI, 4 * Math.PI]];
-        const t0 = Math.acos(rhs);
-        return [
-            [t0, 2 * Math.PI - t0],
-            [2 * Math.PI + t0, 4 * Math.PI - t0]
-        ];
+        if (rhs >= 1) return { intervals: [], tValues, hasSolution: false };
+        if (rhs <= -1) return { intervals: [[0, 2*Math.PI]], tValues, hasSolution: true };
+        return {
+            intervals: [[t0, 2*Math.PI-t0]],
+            tValues,
+            hasSolution: true
+        };
     }
 }
 
 function updateResults(r, h) {
-    const intervals = calculateIntervals(r, h);
+    const result = calculateIntervals(r, h);
+    const intervals = result.intervals;
+    const tVals = result.tValues;
     const condText = conditionToggle.checked ? 'H < 18' : 'H > 18';
+    const condSymbol = conditionToggle.checked ? 'B' : 'A';
 
-    if (intervals.length === 0) {
+    if (!result.hasSolution || intervals.length === 0) {
         resultContent.innerHTML =
-            '<div class="result-item"><span class="result-label">计算结果：</span>' +
-            '<span class="no-solution">无满足条件的 t 值</span></div>' +
-            '<div class="result-item">说明：当前参数下，摩天轮高度始终不符合 ' + condText + '</div>';
+            '<div class="result-item"><span class="result-label">条件 <span class="result-value">' + condSymbol + '</span>（' + condText + '）：</span>' +
+            '<span class="no-solution">无解</span></div>' +
+            '<div class="result-item">说明：当前参数下，高度始终不满足 ' + condText + '</div>';
         return;
     }
 
-    let html = '<div class="result-item"><span class="result-label">计算结果（' + condText + '）：</span></div>';
+    let html = '<div class="result-item"><span class="result-label">条件 <span class="result-value">' + condSymbol + '</span>（' + condText + '）的解：</span></div>';
     
+    // 显示临界点
+    if (tVals.length >= 2 && result.hasSolution) {
+        html += '<div class="result-item"><span class="result-label">临界点：</span>' +
+            '<span class="result-value">t₁ = ' + tVals[0].toFixed(4) + ', t₂ = ' + tVals[1].toFixed(4) + '</span></div>';
+    } else if (result.hasSolution) {
+        html += '<div class="result-item"><span class="result-label">说明：</span>' +
+            '<span class="result-value">整个周期内均满足条件</span></div>';
+    }
+
+    // 合并区间
     const merged = [];
     for (let i = 0; i < intervals.length; i++) {
         if (merged.length > 0 && Math.abs(intervals[i][0] - merged[merged.length-1][1]) < 0.0001) {
@@ -531,17 +551,18 @@ function updateResults(r, h) {
         }
     }
 
-    merged.forEach(function(interval, idx) {
+    // 显示时间段
+    const timeStr = merged.map(function(interval, idx) {
         const start = interval[0].toFixed(4);
         const end = interval[1].toFixed(4);
-        html += '<div class="result-item">' +
-            '<span class="result-value">t ∈ (' + start + ', ' + end + ')</span>' +
-            (idx < 2 ? ' (第' + (idx + 1) + '个周期)' : '') +
-            '</div>';
-    });
+        return '(' + start + ', ' + end + ')';
+    }).join('  ∪  ');
+
+    html += '<div class="result-item" style="margin-top:12px;"><span class="result-label">满足时间段：</span></div>' +
+        '<div class="result-item"><span class="result-value" style="font-size:14px; word-break:break-all;">t ∈ ' + timeStr + '</span></div>';
 
     const maxH = h + 2 * r;
-    html += '<div class="result-item"><span class="result-label">当前参数：</span>' +
+    html += '<div class="result-item" style="margin-top:12px;"><span class="result-label">当前参数：</span>' +
         '<span class="result-value">r = ' + r + ', h = ' + h + '</span></div>';
     html += '<div class="result-item"><span class="result-label">高度范围：</span>' +
         '<span class="result-value">[' + h + ', ' + maxH.toFixed(1) + '] m</span></div>';
@@ -559,8 +580,12 @@ function drawFerrisWheel(r, h) {
 
     ctx.clearRect(0, 0, w, hCanvas);
 
-    // 深色背景匹配页面
-    ctx.fillStyle = '#060b18';
+    // 深空渐变背景
+    const skyBg = ctx.createLinearGradient(0, 0, 0, hCanvas);
+    skyBg.addColorStop(0, '#1a1c3a');
+    skyBg.addColorStop(0.5, '#1e2045');
+    skyBg.addColorStop(1, '#13182f');
+    ctx.fillStyle = skyBg;
     ctx.fillRect(0, 0, w, hCanvas);
 
     const maxH = Math.max(h + 2 * r, 20);
@@ -588,15 +613,15 @@ function drawFerrisWheel(r, h) {
     ctx.arc(w - 55, 50, 18, 0, 2 * Math.PI);
     ctx.fill();
     ctx.shadowBlur = 0;
-    ctx.fillStyle = '#060b18';
+    ctx.fillStyle = '#1a1c3a';
     ctx.beginPath();
     ctx.arc(w - 48, 45, 13, 0, 2 * Math.PI);
     ctx.fill();
 
     // 地面
     const grd = ctx.createLinearGradient(0, groundY, 0, hCanvas);
-    grd.addColorStop(0, '#12192b');
-    grd.addColorStop(1, '#060b18');
+    grd.addColorStop(0, '#242842');
+    grd.addColorStop(1, '#13182f');
     ctx.fillStyle = grd;
     ctx.fillRect(0, groundY, w, hCanvas - groundY);
 
@@ -720,7 +745,7 @@ function drawFerrisWheel(r, h) {
     }
 
     // 内部半透明填充
-    ctx.fillStyle = 'rgba(6, 11, 24, 0.5)';
+    ctx.fillStyle = 'rgba(26, 28, 58, 0.4)';
     ctx.beginPath();
     ctx.arc(centerX, centerY, R, 0, 2 * Math.PI);
     ctx.fill();
@@ -798,7 +823,7 @@ function drawFerrisWheel(r, h) {
     }
 
     // 中心轴
-    ctx.fillStyle = '#060b18';
+    ctx.fillStyle = '#1a1c3a';
     ctx.shadowColor = '#00f0ff';
     ctx.shadowBlur = 12;
     ctx.beginPath();
@@ -874,7 +899,7 @@ function drawFerrisWheel(r, h) {
         ctx.setLineDash([]);
         ctx.shadowBlur = 0;
 
-        ctx.fillStyle = '#060b18';
+        ctx.fillStyle = '#1a1c3a';
         ctx.strokeStyle = '#ff006e';
         ctx.lineWidth = 1.5;
         ctx.beginPath();
@@ -918,9 +943,9 @@ function initChart() {
                     const {ctx: c, chartArea} = chart;
                     if(!chartArea) return null;
                     const grad = c.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
-                    grad.addColorStop(0, 'rgba(0, 240, 255, 0.25)');
-                    grad.addColorStop(0.5, 'rgba(191, 0, 255, 0.1)');
-                    grad.addColorStop(1, 'rgba(6, 11, 24, 0)');
+                    grad.addColorStop(0, 'rgba(0, 240, 255, 0.3)');
+                    grad.addColorStop(0.5, 'rgba(191, 0, 255, 0.15)');
+                    grad.addColorStop(1, 'rgba(30, 40, 80, 0)');
                     return grad;
                 },
                 tension: 0.4
@@ -930,7 +955,7 @@ function initChart() {
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
-                legend: { display: true, position: 'top', labels: { color: '#94a3b8', font: { family: 'Orbitron', size: 11 } } },
+                legend: { display: true, position: 'top', labels: { color: '#cbd5e1', font: { family: 'Orbitron', size: 11 } } },
                 tooltip: {
                     enabled: true,
                     callbacks: {
@@ -938,7 +963,7 @@ function initChart() {
                             return 'H = ' + context.parsed.y.toFixed(2) + ' m';
                         }
                     },
-                    backgroundColor: 'rgba(6, 11, 24, 0.9)',
+                    backgroundColor: 'rgba(30, 40, 80, 0.9)',
                     borderColor: '#00f0ff',
                     borderWidth: 1,
                     titleColor: '#00f0ff',
@@ -948,22 +973,22 @@ function initChart() {
             },
             scales: {
                 x: {
-                    title: { display: true, text: 't', color: '#64748b', font: { family: 'Orbitron' } },
+                    title: { display: true, text: 't', color: '#94a3b8', font: { family: 'Orbitron' } },
                     ticks: {
-                        color: '#64748b',
+                        color: '#94a3b8',
                         font: { size: 10 },
                         callback: function(value) {
                             return (value / Math.PI).toFixed(1) + 'π';
                         }
                     },
-                    grid: { color: 'rgba(100,116,139,0.1)' }
+                    grid: { color: 'rgba(150,165,200,0.15)' }
                 },
                 y: {
-                    title: { display: true, text: 'H (m)', color: '#64748b', font: { family: 'Orbitron' } },
+                    title: { display: true, text: 'H (m)', color: '#94a3b8', font: { family: 'Orbitron' } },
                     beginAtZero: false,
                     min: 0,
-                    ticks: { color: '#64748b', font: { size: 10 } },
-                    grid: { color: 'rgba(100,116,139,0.1)' }
+                    ticks: { color: '#94a3b8', font: { size: 10 } },
+                    grid: { color: 'rgba(150,165,200,0.15)' }
                 }
             }
         },
@@ -993,6 +1018,52 @@ function initChart() {
                     ctx.fillText('18', xScale.right - 30, y - 6);
                     ctx.restore();
                 }
+            }
+        }, {
+            id: 'criticalPoints',
+            afterDraw: function(chart) {
+                const ctx = chart.ctx;
+                const yScale = chart.scales.y;
+                const xScale = chart.scales.x;
+                const r = parseFloat(rSlider.value);
+                const h = parseFloat(hSlider.value);
+                const rhs = (h + r - THRESHOLD) / r;
+                
+                if (rhs > 1 || rhs < -1) return;
+                
+                const t0 = Math.acos(rhs);
+                const yThresh = yScale.getPixelForValue(THRESHOLD);
+                const points = [t0, 2*Math.PI - t0];
+                
+                ctx.save();
+                points.forEach(function(t, i) {
+                    if (t >= 0 && t <= 2 * Math.PI) {
+                        const x = xScale.getPixelForValue(t);
+                        if (x >= xScale.left && x <= xScale.right) {
+                            ctx.beginPath();
+                            ctx.arc(x, yThresh, 6, 0, 2 * Math.PI);
+                            const col = i === 0 ? '#ffe600' : '#ff5c00';
+                            ctx.fillStyle = col;
+                            ctx.shadowColor = col;
+                            ctx.shadowBlur = 12;
+                            ctx.fill();
+                            ctx.shadowBlur = 0;
+                            ctx.strokeStyle = '#1e293b';
+                            ctx.lineWidth = 2;
+                            ctx.stroke();
+                            
+                            ctx.font = 'bold 13px "Orbitron", sans-serif';
+                            ctx.fillStyle = col;
+                            ctx.textAlign = 'center';
+                            ctx.fillText('t' + (i+1), x, yThresh - 14);
+                            
+                            ctx.font = '10px sans-serif';
+                            ctx.fillStyle = '#94a3b8';
+                            ctx.fillText(t.toFixed(2), x, yThresh + 20);
+                        }
+                    }
+                });
+                ctx.restore();
             }
         }, {
             id: 'highlightAbove',
@@ -1039,7 +1110,7 @@ function updateChart(r, h) {
     const numPoints = 300;
 
     for (let i = 0; i <= numPoints; i++) {
-        const t = (4 * Math.PI * i) / numPoints;
+        const t = (2 * Math.PI * i) / numPoints;
         tValues.push(t);
         hValues.push(H(t, r, h));
     }
