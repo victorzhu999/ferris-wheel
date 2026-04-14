@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>摩天轮相关参数</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+  color: #fff;
+  overflow-x: hidden;
+}
+
+.ferris-wheel-container {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 0;
+  opacity: 0.15;
+}
+
+.ferriswheel svg {
+  width: 800px;
+  height: 800px;
+  animation: rotate 20s linear infinite;
+}
+
+@keyframes rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes glow {
+  0%, 100% { filter: drop-shadow(0 0 5px #fff) drop-shadow(0 0 10px #fff); }
+  50% { filter: drop-shadow(0 0 15px #ff6b6b) drop-shadow(0 0 30px #ff6b6b); }
+}
+
+.ferriswheel svg {
+  animation: rotate 20s linear infinite, glow 3s ease-in-out infinite;
+}
+
+.stars {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.star {
+  position: absolute;
+  width: 2px; height: 2px;
+  background: #fff;
+  border-radius: 50%;
+  animation: twinkle 2s ease-in-out infinite alternate;
+}
+
+@keyframes twinkle {
+  from { opacity: 0.3; }
+  to { opacity: 1; }
+}
+
+.container {
+  position: relative;
+  z-index: 1;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 40px 20px;
+}
+
+h1 {
+  text-align: center;
+  font-size: 2.5em;
+  margin-bottom: 40px;
+  background: linear-gradient(90deg, #ff6b6b, #feca57, #48dbfb, #ff9ff3);
+  background-size: 300%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: gradient 5s ease infinite;
+}
+
+@keyframes gradient {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.input-group {
+  background: rgba(255,255,255,0.1);
+  backdrop-filter: blur(10px);
+  border-radius: 15px;
+  padding: 30px;
+  margin-bottom: 25px;
+  border: 1px solid rgba(255,255,255,0.2);
+}
+
+.input-group h2 {
+  margin-bottom: 20px;
+  color: #feca57;
+}
+
+.input-field {
+  margin: 15px 0;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.input-field label {
+  min-width: 120px;
+  font-weight: bold;
+}
+
+.input-field input {
+  flex: 1;
+  padding: 12px 15px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-radius: 8px;
+  background: rgba(255,255,255,0.05);
+  color: #fff;
+  font-size: 1em;
+  transition: all 0.3s;
+}
+
+.input-field input:focus {
+  outline: none;
+  border-color: #48dbfb;
+  box-shadow: 0 0 15px rgba(72, 219, 251, 0.5);
+}
+
+.group-select {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.group-btn {
+  padding: 15px;
+  border: 2px solid rgba(255,255,255,0.3);
+  background: rgba(255,255,255,0.1);
+  color: #fff;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 1.1em;
+  transition: all 0.3s;
+}
+
+.group-btn:hover, .group-btn.active {
+  background: #48dbfb;
+  border-color: #48dbfb;
+  transform: scale(1.05);
+}
+
+.group-btn.completed {
+  background: #1dd1a1;
+  border-color: #1dd1a1;
+}
+
+.submit-btn {
+  display: block;
+  width: 100%;
+  max-width: 300px;
+  margin: 40px auto;
+  padding: 18px;
+  font-size: 1.3em;
+  background: linear-gradient(135deg, #ff6b6b, #ff9ff3);
+  border: none;
+  border-radius: 12px;
+  color: #fff;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-weight: bold;
+}
+
+.submit-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 30px rgba(255, 107, 107, 0.5);
+}
+
+.submit-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.result {
+  display: none;
+  background: rgba(255,255,255,0.1);
+  backdrop-filter: blur(15px);
+  border-radius: 20px;
+  padding: 40px;
+  border: 1px solid rgba(255,255,255,0.2);
+}
+
+.score-section {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.score-section h2 {
+  font-size: 2em;
+  margin-bottom: 15px;
+}
+
+.total-score {
+  font-size: 4em;
+  font-weight: bold;
+  background: linear-gradient(90deg, #feca57, #ff6b6b);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.answer-review {
+  margin-top: 30px;
+}
+
+.answer-review h3 {
+  color: #48dbfb;
+  margin-bottom: 15px;
+}
+
+.review-item {
+  background: rgba(255,255,255,0.05);
+  padding: 15px;
+  border-radius: 10px;
+  margin-bottom: 10px;
+  border-left: 4px solid #ff6b6b;
+}
+
+.review-item.correct {
+  border-left-color: #1dd1a1;
+}
+
+.review-item.wrong {
+  border-left-color: #ff6b6b;
+}
+
+.review-item .label {
+  font-weight: bold;
+  color: #feca57;
+}
+
+.review-item .answer {
+  margin-top: 8px;
+}
+
+.comment {
+  text-align: center;
+  padding: 20px;
+  margin-top: 20px;
+  font-size: 1.1em;
+  line-height: 1.8;
+  background: rgba(72, 219, 251, 0.1);
+  border-radius: 12px;
+}
+
+.hidden { display: none !important; }
+
+@media (max-width: 768px) {
+  .container {
+    padding: 20px 15px;
+  }
+
+  h1 {
+    font-size: 1.8em;
+    margin-bottom: 25px;
+  }
+
+  .ferris-wheel-container {
+    opacity: 0.08;
+  }
+
+  .ferriswheel svg {
+    width: 400px;
+    height: 400px;
+  }
+
+  .input-group {
+    padding: 20px 15px;
+    margin-bottom: 15px;
+  }
+
+  .input-group h2 {
+    font-size: 1.2em;
+    margin-bottom: 15px;
+  }
+
+  .input-field {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .input-field label {
+    min-width: unset;
+  }
+
+  .input-field input {
+    padding: 14px;
+    font-size: 1.1em;
+  }
+
+  .group-select {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .group-btn {
+    padding: 12px;
+    font-size: 1em;
+  }
+
+  .submit-btn {
+    font-size: 1.1em;
+    padding: 15px;
+    max-width: 100%;
+  }
+
+  .result {
+    padding: 25px 15px;
+  }
+
+  .total-score {
+    font-size: 3em;
+  }
+
+  .review-item {
+    padding: 12px;
+  }
+
+  .comment {
+    font-size: 1em;
+    padding: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  h1 {
+    font-size: 1.5em;
+  }
+
+  .ferriswheel svg {
+    width: 300px;
+    height: 300px;
+  }
+
+  .group-select {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+
+  .group-btn {
+    padding: 10px 8px;
+    font-size: 0.95em;
+  }
+}
+</style>
+</head>
+<body>
+
+<div class="stars" id="stars"></div>
+
+<div class="ferris-wheel-container">
+  <div class="ferriswheel">
+    <svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="200" cy="200" r="150" stroke="#ff6b6b" stroke-width="4" fill="none"/>
+      <line x1="200" y1="50" x2="200" y2="350" stroke="#feca57" stroke-width="3"/>
+      <line x1="50" y1="200" x2="350" y2="200" stroke="#feca57" stroke-width="3"/>
+      <line x1="94" y1="94" x2="306" y2="306" stroke="#48dbfb" stroke-width="3"/>
+      <line x1="306" y1="94" x2="94" y2="306" stroke="#48dbfb" stroke-width="3"/>
+      <line x1="125" y1="67" x2="275" y2="333" stroke="#ff9ff3" stroke-width="2"/>
+      <line x1="275" y1="67" x2="125" y2="333" stroke="#ff9ff3" stroke-width="2"/>
+      <line x1="67" y1="125" x2="333" y2="275" stroke="#ff9ff3" stroke-width="2"/>
+      <line x1="333" y1="125" x2="67" y2="275" stroke="#ff9ff3" stroke-width="2"/>
+      <circle cx="200" cy="50" r="10" fill="#ff6b6b"/>
+      <circle cx="200" cy="350" r="10" fill="#ff6b6b"/>
+      <circle cx="50" cy="200" r="10" fill="#feca57"/>
+      <circle cx="350" cy="200" r="10" fill="#feca57"/>
+      <circle cx="94" cy="94" r="8" fill="#48dbfb"/>
+      <circle cx="306" cy="306" r="8" fill="#48dbfb"/>
+      <circle cx="306" cy="94" r="8" fill="#ff9ff3"/>
+      <circle cx="94" cy="306" r="8" fill="#ff9ff3"/>
+      <circle cx="125" cy="67" r="6" fill="#1dd1a1"/>
+      <circle cx="275" cy="333" r="6" fill="#1dd1a1"/>
+      <circle cx="275" cy="67" r="6" fill="#54a0ff"/>
+      <circle cx="125" cy="333" r="6" fill="#54a0ff"/>
+      <circle cx="67" cy="125" r="6" fill="#c44569"/>
+      <circle cx="333" cy="275" r="6" fill="#c44569"/>
+      <circle cx="333" cy="125" r="6" fill="#f78fb3"/>
+      <circle cx="67" cy="275" r="6" fill="#f78fb3"/>
+      <circle cx="200" cy="200" r="20" fill="#fff"/>
+      <rect x="190" y="330" width="20" height="70" fill="#fff" rx="3"/>
+    </svg>
+  </div>
+</div>
+
+<div class="container">
+  <h1>🎡 摩天轮相关参数</h1>
+  
+  <div id="quizForm">
+    <div class="input-group">
+      <h2>请输入摩天轮参数</h2>
+      <p style="margin-bottom: 20px; color: rgba(255,255,255,0.7);">已知摩天轮运动方程为：h(t) = r·sin(ωt + φ) + h₀，请根据题意输入正确参数值</p>
+      
+      <div class="input-field">
+        <label>半径 r =</label>
+        <input type="number" step="any" id="input-r" placeholder="输入r的值">
+      </div>
+      <div class="input-field">
+        <label>角速度 ω =</label>
+        <input type="number" step="any" id="input-omega" placeholder="输入ω的值">
+      </div>
+      <div class="input-field">
+        <label>初相 φ =</label>
+        <input type="number" step="any" id="input-phi" placeholder="输入φ的值">
+      </div>
+      <div class="input-field">
+        <label>高度 h₀ =</label>
+        <input type="number" step="any" id="input-h" placeholder="输入h的值">
+      </div>
+    </div>
+    
+    <div class="input-group">
+      <h2>选择答题组号</h2>
+      <div class="group-select" id="groupSelect">
+        <button class="group-btn" data-group="1">第 1 组</button>
+        <button class="group-btn" data-group="2">第 2 组</button>
+        <button class="group-btn" data-group="3">第 3 组</button>
+        <button class="group-btn" data-group="4">第 4 组</button>
+        <button class="group-btn" data-group="5">第 5 组</button>
+        <button class="group-btn" data-group="6">第 6 组</button>
+        <button class="group-btn" data-group="7">第 7 组</button>
+        <button class="group-btn" data-group="8">第 8 组</button>
+        <button class="group-btn" data-group="9">第 9 组</button>
+      </div>
+    </div>
+    
+    <button class="submit-btn" id="submitBtn" disabled>提交答案</button>
+  </div>
+
+  <div class="result" id="result">
+    <div class="score-section">
+      <h2>最终成绩</h2>
+      <div class="total-score" id="totalScore">0</div>
+      <p>分</p>
+    </div>
+    
+    <div class="answer-review" id="answerReview">
+      <h3>答题详情</h3>
+    </div>
+    
+    <div class="comment" id="comment"></div>
+  </div>
+</div>
+
+<script>
+const CORRECT = { r: 1, omega: 2, phi: 3, h: 4 };
+const TOLERANCE = 0.01;
+
+let selectedGroups = new Set();
+let answers = {};
+
+// 生成星星
+function createStars() {
+  const container = document.getElementById('stars');
+  for (let i = 0; i < 100; i++) {
+    const star = document.createElement('div');
+    star.className = 'star';
+    star.style.left = Math.random() * 100 + '%';
+    star.style.top = Math.random() * 100 + '%';
+    star.style.animationDelay = Math.random() * 2 + 's';
+    star.style.width = star.style.height = (Math.random() * 2 + 1) + 'px';
+    container.appendChild(star);
+  }
+}
+createStars();
+
+// 组选择逻辑
+document.querySelectorAll('.group-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const group = btn.dataset.group;
+    if (selectedGroups.has(group)) {
+      selectedGroups.delete(group);
+      delete answers[group];
+      btn.classList.remove('completed');
+    } else {
+      selectedGroups.add(group);
+      saveAnswer(group);
+      btn.classList.add('completed');
+    }
+    document.querySelectorAll('.group-btn').forEach(b => b.classList.remove('active'));
+    updateSubmitBtn();
+  });
+});
+
+function saveAnswer(group) {
+  if (selectedGroups.has(group)) {
+    answers[group] = {
+      r: document.getElementById('input-r').value,
+      omega: document.getElementById('input-omega').value,
+      phi: document.getElementById('input-phi').value,
+      h: document.getElementById('input-h').value
+    };
+  }
+}
+
+function updateSubmitBtn() {
+  document.getElementById('submitBtn').disabled = selectedGroups.size === 0;
+}
+
+// 提交
+document.getElementById('submitBtn').addEventListener('click', async () => {
+  const submitBtn = document.getElementById('submitBtn');
+  submitBtn.disabled = true;
+  submitBtn.textContent = '提交中...';
+
+  let totalScore = 0;
+  const maxScorePerParam = 25;
+  const maxScorePerGroup = 100;
+  const reviewContainer = document.getElementById('answerReview');
+  reviewContainer.innerHTML = '<h3>答题详情</h3>';
+
+  const sortedGroups = [...selectedGroups].sort((a,b) => a - b);
+  
+  sortedGroups.forEach(group => {
+    const ans = answers[group] || { r: '', omega: '', phi: '', h: '' };
+    let groupScore = 0;
+    let isCorrect = true;
+    let details = [];
+
+    Object.keys(CORRECT).forEach(key => {
+      const userVal = parseFloat(ans[key]);
+      const correctVal = CORRECT[key];
+      const correct = !isNaN(userVal) && Math.abs(userVal - correctVal) < TOLERANCE;
+      if (correct) {
+        groupScore += maxScorePerParam;
+      } else {
+        isCorrect = false;
+      }
+      const labelMap = { r: '半径 r', omega: '角速度 ω', phi: '初相 φ', h: '高度 h₀' };
+      details.push({
+        label: labelMap[key],
+        userAnswer: ans[key] || '未填',
+        correctAnswer: correctVal,
+        correct
+      });
+    });
+
+    totalScore += groupScore;
+
+    const reviewItem = document.createElement('div');
+    reviewItem.className = `review-item ${isCorrect ? 'correct' : 'wrong'}`;
+    reviewItem.innerHTML = `
+      <div class="label">第 ${group} 组 - 得分：${groupScore.toFixed(0)}/${maxScorePerGroup}</div>
+      <div class="answer">
+        ${details.map(d => `
+          <div style="margin: 5px 0;">
+            ${d.label} (25分): 你的答案 <strong>${d.userAnswer}</strong> 
+            ${d.correct ? '✅' : '❌ 正确答案: <strong>' + d.correctAnswer + '</strong>'}
+          </div>
+        `).join('')}
+      </div>
+    `;
+    reviewContainer.appendChild(reviewItem);
+  });
+
+  const finalScore = (totalScore / selectedGroups.size).toFixed(0);
+  document.getElementById('totalScore').textContent = finalScore;
+
+  // 评价
+  let comment = '';
+  const score = parseFloat(finalScore);
+  const maxPossible = selectedGroups.size * 100;
+  const ratio = score / maxPossible;
+
+  if (ratio === 1) {
+    comment = '🎉 太棒了！满分通过！你对摩天轮参数的理解非常精准，继续保持这种优秀的学习状态！';
+  } else if (ratio >= 0.8) {
+    comment = '💪 优秀！你的成绩非常出色，基础知识掌握牢固。建议复习错题部分，争取下次满分！';
+  } else if (ratio >= 0.6) {
+    comment = '👍 良好！你已经掌握了大部分知识点，建议重点复习三角函数模型中各参数的物理意义。';
+  } else if (ratio >= 0.4) {
+    comment = '📚 及格！基础知识还需要加强，建议重新学习摩天轮运动方程，理解每个参数的含义。';
+  } else {
+    comment = '💡 需要加油！建议重新回顾摩天轮相关知识，重点理解半径、角速度、初相和高度的概念。';
+  }
+  document.getElementById('comment').innerHTML = comment;
+
+  // 发送数据到API
+  const postData = {
+    studentId: `访客${Date.now()}`,
+    group: sortedGroups.join(','),
+    answers: answers,
+    score: finalScore,
+    maxScore: maxPossible,
+    timestamp: new Date().toISOString()
+  };
+
+  try {
+    await fetch('https://quickform.cn/api/e5e982atsm', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(postData)
+    });
+  } catch (e) {
+    console.log('提交失败', e);
+  }
+
+  document.getElementById('quizForm').classList.add('hidden');
+  document.getElementById('result').style.display = 'block';
+});
+</script>
+
+</body>
+</html>

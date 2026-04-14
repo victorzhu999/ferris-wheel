@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>摩天轮参数作答情况统计</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+  color: #fff;
+  padding: 40px 20px;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+h1 {
+  text-align: center;
+  font-size: 2.5em;
+  margin-bottom: 40px;
+  background: linear-gradient(90deg, #48dbfb, #feca57, #ff6b6b);
+  background-size: 300%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: gradient 5s ease infinite;
+}
+
+@keyframes gradient {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.overview {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  margin-bottom: 40px;
+}
+
+.overview-item {
+  background: rgba(255,255,255,0.1);
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+  border: 1px solid rgba(255,255,255,0.2);
+}
+
+.overview-item .label {
+  font-size: 0.9em;
+  opacity: 0.8;
+  margin-bottom: 10px;
+}
+
+.overview-item .value {
+  font-size: 2.5em;
+  font-weight: bold;
+}
+
+.overview-item .value.blue { color: #48dbfb; }
+.overview-item .value.green { color: #1dd1a1; }
+.overview-item .value.yellow { color: #feca57; }
+
+.card {
+  background: rgba(255,255,255,0.1);
+  backdrop-filter: blur(10px);
+  border-radius: 15px;
+  padding: 25px;
+  margin-bottom: 25px;
+  border: 1px solid rgba(255,255,255,0.2);
+}
+
+.card h2 {
+  color: #feca57;
+  margin-bottom: 20px;
+  font-size: 1.4em;
+}
+
+.group-rankings {
+  background: rgba(255,255,255,0.05);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.group-rank-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 25px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  transition: background 0.3s;
+}
+
+.group-rank-item:hover {
+  background: rgba(255,255,255,0.05);
+}
+
+.group-rank-item:last-child { border-bottom: none; }
+
+.rank-pos {
+  min-width: 50px;
+  font-weight: bold;
+  font-size: 1.2em;
+  color: #feca57;
+}
+
+.rank-group-name {
+  flex: 1;
+  font-size: 1.1em;
+  margin-left: 15px;
+}
+
+.rank-score {
+  font-weight: bold;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 1.1em;
+  margin-right: 15px;
+}
+
+.rank-score.excellent { background: rgba(29, 209, 161, 0.3); color: #1dd1a1; }
+.rank-score.good { background: rgba(254, 202, 87, 0.3); color: #feca57; }
+.rank-score.poor { background: rgba(255, 107, 107, 0.3); color: #ff6b6b; }
+
+.rank-bar {
+  width: 150px;
+  height: 10px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 5px;
+}
+
+.rank-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #48dbfb, #1dd1a1);
+  border-radius: 5px;
+  transition: width 1s ease;
+}
+
+.bar-chart {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.bar-item {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.bar-label {
+  min-width: 70px;
+  font-weight: bold;
+  text-align: right;
+}
+
+.bar-track {
+  flex: 1;
+  height: 35px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 15px;
+  overflow: hidden;
+  position: relative;
+}
+
+.bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #48dbfb, #1dd1a1);
+  border-radius: 15px;
+  transition: width 1.5s ease;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 12px;
+  font-weight: bold;
+  font-size: 0.95em;
+}
+
+.knowledge-section {
+  margin-top: 25px;
+}
+
+.knowledge-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
+}
+
+.knowledge-item {
+  padding: 20px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 12px;
+  text-align: center;
+  border: 1px solid rgba(255,255,255,0.15);
+}
+
+.knowledge-item h4 {
+  margin-bottom: 12px;
+  color: #ff9ff3;
+}
+
+.knowledge-item .rate {
+  font-size: 2em;
+  font-weight: bold;
+  margin: 10px 0;
+}
+
+.knowledge-item .desc {
+  font-size: 0.9em;
+  opacity: 0.8;
+}
+
+.teaching-measure {
+  margin-top: 15px;
+  padding: 15px;
+  background: rgba(72, 219, 251, 0.15);
+  border-radius: 8px;
+  border-left: 4px solid #48dbfb;
+}
+
+.teaching-measure strong {
+  color: #48dbfb;
+}
+
+.level-box {
+  padding: 25px;
+  border-radius: 12px;
+  text-align: center;
+  margin-top: 20px;
+}
+
+.level-box.nohelp {
+  background: radial-gradient(circle at center, rgba(29, 209, 161, 0.15), rgba(29, 209, 161, 0.05));
+  border: 1px solid rgba(29, 209, 161, 0.5);
+}
+
+.level-box.watch {
+  background: radial-gradient(circle at center, rgba(254, 202, 87, 0.15), rgba(254, 202, 87, 0.05));
+  border: 1px solid rgba(254, 202, 87, 0.5);
+}
+
+.level-box.critical {
+  background: radial-gradient(circle at center, rgba(255, 107, 107, 0.15), rgba(255, 107, 107, 0.05));
+  border: 1px solid rgba(255, 107, 107, 0.5);
+}
+
+.level-title {
+  font-size: 1.3em;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.level-box.nohelp .level-title { color: #1dd1a1; }
+.level-box.watch .level-title { color: #feca57; }
+.level-box.critical .level-title { color: #ff6b6b; }
+
+.level-count {
+  font-size: 2em;
+  font-weight: bold;
+  color: #fff;
+}
+
+.loading {
+  text-align: center;
+  padding: 100px;
+  font-size: 1.5em;
+  color: #48dbfb;
+}
+
+.error {
+  text-align: center;
+  padding: 50px;
+  color: #ff6b6b;
+}
+
+.analysis-item {
+  margin-bottom: 20px;
+  padding: 20px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 10px;
+  border-left: 4px solid #48dbfb;
+}
+
+.analysis-item h3 {
+  color: #feca57;
+  margin-bottom: 10px;
+}
+
+.analysis-item p {
+  line-height: 1.6;
+  opacity: 0.9;
+}
+
+.group-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.group-stat-item {
+  padding: 10px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 8px;
+  text-align: center;
+}
+
+.group-stat-item .label {
+  font-size: 0.8em;
+  opacity: 0.7;
+}
+
+.group-stat-item .value {
+  font-size: 1.2em;
+  font-weight: bold;
+  color: #48dbfb;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h1>🎡 摩天轮参数作答情况统计</h1>
+  
+  <div id="loading" class="loading">正在获取数据...</div>
+  <div id="error" class="error" style="display: none;"></div>
+  <div id="content" style="display: none;">
+    <div class="overview" id="overview"></div>
+    
+    <div class="card">
+      <h2>🏆 小组排名</h2>
+      <div class="group-rankings" id="rankings"></div>
+    </div>
+    
+    <div class="card">
+      <h2>📊 小组平均分对比</h2>
+      <div class="bar-chart" id="barChart"></div>
+    </div>
+    
+    <div class="card">
+      <h2>📚 知识点掌握分析（按小组）</h2>
+      <div class="knowledge-section" id="knowledgeSection"></div>
+    </div>
+    
+    <div class="card">
+      <h2>🎯 小组分层</h2>
+      <div id="levelSection"></div>
+    </div>
+    
+    <div class="card">
+      <h2>💡 教学分析与建议</h2>
+      <div id="analysisContent"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const API_URL = 'https://quickform.cn/api/e5e982atsm/all';
+const CORRECT = { r: 1, omega: 2, phi: 3, h: 4 };
+const TOLERANCE = 0.01;
+const PARAM_LABELS = { r: '半径 r', omega: '角速度 ω', phi: '初相 φ', h: '高度 h₀' };
+
+async function loadData() {
+  try {
+    const response = await fetch(API_URL);
+    const data = await response.json();
+    const submissions = data.submissions || data.data || data;
+    
+    if (!Array.isArray(submissions)) {
+      throw new Error('数据格式错误');
+    }
+    
+    processSubmissions(submissions);
+  } catch (e) {
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('error').style.display = 'block';
+    document.getElementById('error').textContent = '获取数据失败: ' + e.message;
+  }
+}
+
+function processSubmissions(submissions) {
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('content').style.display = 'block';
+  
+  const groupStats = {};
+  
+  submissions.forEach(sub => {
+    const studentId = sub.studentId || '匿名学生';
+    const answers = sub.answers || {};
+    
+    Object.entries(answers).forEach(([groupNum, groupAns]) => {
+      if (!groupStats[groupNum]) {
+        groupStats[groupNum] = {
+          scores: [],
+          paramCorrect: { r: 0, omega: 0, phi: 0, h: 0 },
+          paramTotal: { r: 0, omega: 0, phi: 0, h: 0 },
+          students: []
+        };
+      }
+      
+      let score = 0;
+      Object.keys(CORRECT).forEach(key => {
+        groupStats[groupNum].paramTotal[key]++;
+        const userVal = parseFloat(groupAns[key]);
+        const isCorrect = !isNaN(userVal) && Math.abs(userVal - CORRECT[key]) < TOLERANCE;
+        if (isCorrect) {
+          score += 25;
+          groupStats[groupNum].paramCorrect[key]++;
+        }
+      });
+      
+      groupStats[groupNum].scores.push(score);
+      groupStats[groupNum].students.push(studentId);
+    });
+  });
+  
+  const groupRankings = [];
+  
+  Object.entries(groupStats).forEach(([groupNum, stats]) => {
+    const avgScore = Math.round(stats.scores.reduce((a, b) => a + b, 0) / stats.scores.length);
+    const maxScore = Math.max(...stats.scores);
+    const minScore = Math.min(...stats.scores);
+    const paramRates = {};
+    
+    Object.keys(CORRECT).forEach(key => {
+      paramRates[key] = stats.paramTotal[key] > 0 ? Math.round((stats.paramCorrect[key] / stats.paramTotal[key]) * 100) : 0;
+    });
+    
+    groupRankings.push({
+      groupNum: parseInt(groupNum),
+      avgScore,
+      maxScore,
+      minScore,
+      studentCount: stats.scores.length,
+      paramRates,
+      paramCorrect: stats.paramCorrect,
+      paramTotal: stats.paramTotal
+    });
+  });
+  
+  groupRankings.sort((a, b) => b.avgScore - a.avgScore);
+  
+  renderOverview(groupRankings);
+  renderRankings(groupRankings);
+  renderBarChart(groupRankings);
+  renderKnowledgeAnalysis(groupRankings);
+  renderLevels(groupRankings);
+  renderAnalysis(groupRankings);
+}
+
+function renderOverview(groupRankings) {
+  const totalGroups = groupRankings.length;
+  const allScores = groupRankings.flatMap(g => {
+    const stats = g;
+    return Array(stats.studentCount).fill(stats.avgScore);
+  });
+  const avgScore = allScores.length ? Math.round(allScores.reduce((a, b) => a + b, 0) / allScores.length) : 0;
+  const topGroup = groupRankings[0]?.groupNum || '-';
+  
+  const fullMarkGroups = groupRankings.filter(g => g.avgScore === 100).length;
+  
+  document.getElementById('overview').innerHTML = `
+    <div class="overview-item">
+      <div class="label">参与小组数</div>
+      <div class="value blue">${totalGroups}</div>
+    </div>
+    <div class="overview-item">
+      <div class="label">总平均分</div>
+      <div class="value yellow">${avgScore}</div>
+    </div>
+    <div class="overview-item">
+      <div class="label">最高分小组</div>
+      <div class="value green">第 ${topGroup} 组</div>
+    </div>
+    <div class="overview-item">
+      <div class="label">满分小组数</div>
+      <div class="value green">${fullMarkGroups}</div>
+    </div>
+  `;
+}
+
+function renderRankings(groupRankings) {
+  document.getElementById('rankings').innerHTML = groupRankings.map((g, i) => {
+    let medal = '';
+    if (i === 0) medal = '🥇';
+    else if (i === 1) medal = '🥈';
+    else if (i === 2) medal = '🥉';
+    
+    let scoreClass = 'excellent';
+    if (g.avgScore < 50) scoreClass = 'poor';
+    else if (g.avgScore < 100) scoreClass = 'good';
+    
+    return `
+      <div class="group-rank-item">
+        <span class="rank-pos">${i + 1}</span>
+        <span class="rank-group-name">第 ${g.groupNum} 组 ${medal}</span>
+        <span class="rank-score ${scoreClass}">${g.avgScore} 分</span>
+        <div class="group-stats-grid">
+          <div class="group-stat-item">
+            <div class="label">人数</div>
+            <div class="value">${g.studentCount}</div>
+          </div>
+          <div class="group-stat-item">
+            <div class="label">最高分</div>
+            <div class="value">${g.maxScore}</div>
+          </div>
+          <div class="group-stat-item">
+            <div class="label">最低分</div>
+            <div class="value">${g.minScore}</div>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderBarChart(groupRankings) {
+  document.getElementById('barChart').innerHTML = groupRankings.map(g => {
+    let color = '#1dd1a1';
+    if (g.avgScore < 50) color = '#ff6b6b';
+    else if (g.avgScore < 100) color = '#feca57';
+    
+    return `
+      <div class="bar-item">
+        <span class="bar-label">第 ${g.groupNum} 组</span>
+        <div class="bar-track">
+          <div class="bar-fill" style="width: ${g.avgScore}%; background: ${color};">${g.avgScore} 分</div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderKnowledgeAnalysis(groupRankings) {
+  const params = [
+    { key: 'r', name: '半径 r', desc: '理解振幅与摩天轮大小' },
+    { key: 'omega', name: '角速度 ω', desc: '决定旋转快慢' },
+    { key: 'phi', name: '初相 φ', desc: '确定初始位置' },
+    { key: 'h', name: '高度 h₀', desc: '图像上下平移' }
+  ];
+  
+  let html = `
+    <div style="margin-bottom: 20px; text-align: right;">
+      <span style="opacity: 0.8;">点击小组查看详细知识点分析</span>
+      <div class="group-tabs" id="knowledgeTabs" style="margin-top: 10px; justify-content: flex-end;"></div>
+    </div>
+    <div id="knowledgeContent"></div>
+  `;
+  
+  document.getElementById('knowledgeSection').innerHTML = html;
+  
+  const tabsContainer = document.getElementById('knowledgeTabs');
+  const contentContainer = document.getElementById('knowledgeContent');
+  
+  let tabsHtml = `<button class="group-tab active" data-group="all">全部</button>`;
+  groupRankings.forEach(g => {
+    tabsHtml += `<button class="group-tab" data-group="${g.groupNum}">第 ${g.groupNum} 组</button>`;
+  });
+  tabsContainer.innerHTML = tabsHtml;
+  
+  tabsContainer.addEventListener('click', (e) => {
+    if (e.target.classList.contains('group-tab')) {
+      tabsContainer.querySelectorAll('.group-tab').forEach(t => t.classList.remove('active'));
+      e.target.classList.add('active');
+      
+      const groupKey = e.target.dataset.group;
+      let filteredRankings;
+      
+      if (groupKey === 'all') {
+        filteredRankings = groupRankings;
+      } else {
+        filteredRankings = groupRankings.filter(g => g.groupNum == groupKey);
+      }
+      
+      contentContainer.innerHTML = `<div class="knowledge-grid">${params.map(p => {
+        let totalCorrect = 0;
+        let totalAll = 0;
+        filteredRankings.forEach(g => {
+          totalCorrect += g.paramCorrect[p.key] || 0;
+          totalAll += g.paramTotal[p.key] || 0;
+        });
+        
+        const masterRate = totalAll > 0 ? Math.round((totalCorrect / totalAll) * 100) : 0;
+        const color = masterRate >= 80 ? '#1dd1a1' : (masterRate >= 60 ? '#feca57' : '#ff6b6b');
+        
+        return `
+          <div class="knowledge-item">
+            <h4>${p.name}</h4>
+            <div class="rate" style="color: ${color};">${masterRate}%</div>
+            <div class="desc">${totalCorrect}/${totalAll} 人次掌握</div>
+            <p style="margin-top: 10px; font-size: 0.85em; opacity: 0.7;">
+              ${masterRate < 70 ? `⚠️ ${p.desc}。建议重点讲解该知识点` : '✓ 掌握情况良好'}
+            </p>
+          </div>
+        `;
+      }).join('')}</div>`;
+    }
+  });
+  
+  const allBtn = tabsContainer.querySelector('[data-group="all"]');
+  if (allBtn) allBtn.click();
+}
+
+function renderLevels(groupRankings) {
+  const noHelp = groupRankings.filter(g => g.avgScore === 100);
+  const needWatch = groupRankings.filter(g => g.avgScore >= 50 && g.avgScore < 100);
+  const critical = groupRankings.filter(g => g.avgScore < 50);
+  
+  document.getElementById('levelSection').innerHTML = `
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+      <div class="level-box nohelp">
+        <div class="level-title">不需帮助 (100分)</div>
+        <div class="level-count">${noHelp.length} 个小组</div>
+        <div style="margin-top: 10px; opacity: 0.8;">
+          ${noHelp.length ? '第 ' + noHelp.map(g => g.groupNum).join('、') + ' 组' : '无'}
+        </div>
+      </div>
+      <div class="level-box watch">
+        <div class="level-title">需要关注 (50-99分)</div>
+        <div class="level-count">${needWatch.length} 个小组</div>
+        <div style="margin-top: 10px; opacity: 0.8;">
+          ${needWatch.length ? needWatch.map(g => `第 ${g.groupNum} 组 (${g.avgScore}分)`).join('、') : '无'}
+        </div>
+      </div>
+      <div class="level-box critical">
+        <div class="level-title">急需干预 (0-49分)</div>
+        <div class="level-count">${critical.length} 个小组</div>
+        <div style="margin-top: 10px; opacity: 0.8;">
+          ${critical.length ? critical.map(g => `第 ${g.groupNum} 组 (${g.avgScore}分)`).join('、') : '无'}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderAnalysis(groupRankings) {
+  const totalGroups = groupRankings.length;
+  const avgScore = totalGroups ? Math.round(groupRankings.reduce((sum, g) => sum + g.avgScore, 0) / totalGroups) : 0;
+  
+  const noHelp = groupRankings.filter(g => g.avgScore === 100);
+  const needWatch = groupRankings.filter(g => g.avgScore >= 50 && g.avgScore < 100);
+  const critical = groupRankings.filter(g => g.avgScore < 50);
+  
+  const weakParams = [];
+  if (groupRankings.length) {
+    Object.keys(CORRECT).forEach(key => {
+      let totalCorrect = 0;
+      let totalAll = 0;
+      groupRankings.forEach(g => {
+        totalCorrect += g.paramCorrect[key] || 0;
+        totalAll += g.paramTotal[key] || 0;
+      });
+      const rate = totalAll > 0 ? Math.round((totalCorrect / totalAll) * 100) : 100;
+      if (rate < 70) {
+        weakParams.push({ key, rate, label: PARAM_LABELS[key] });
+      }
+    });
+  }
+  
+  let analysis = `
+    <div class="analysis-item">
+      <h3>📈 整体概况</h3>
+      <p>参与小组 <strong>${totalGroups}</strong> 个，小组平均分 <strong>${avgScore}</strong> 分。
+      总体表现${avgScore >= 80 ? '优秀' : avgScore >= 60 ? '良好' : avgScore >= 40 ? '一般' : '需要提高'}。</p>
+    </div>
+  `;
+  
+  if (critical.length > 0) {
+    analysis += `
+      <div class="analysis-item">
+        <h3>⚠️ 急需干预小组 (${critical.length}个)</h3>
+        <p>第 ${critical.map(g => g.groupNum).join('、')} 组平均分低于50分，知识点掌握严重不足。</p>
+        <div class="teaching-measure">
+          <strong>教学措施：</strong>建议对这些组进行课后辅导，重点讲解三角函数基本概念。使用图形化工具演示参数变化对函数图像的。可安排优秀组成员一对一帮扶。
+        </div>
+      </div>
+    `;
+  }
+  
+  if (needWatch.length > 0) {
+    analysis += `
+      <div class="analysis-item">
+        <h3>👀 需要关注小组 (${needWatch.length}个)</h3>
+        <p>第 ${needWatch.map(g => g.groupNum).join('、')} 组表现中等，部分知识点需巩固。</p>
+        <div class="teaching-measure">
+          <strong>教学措施：</strong>针对薄弱环节布置专项练习。提供变式题目加深理解。鼓励组内互助学习。
+        </div>
+      </div>
+    `;
+  }
+  
+  if (noHelp.length > 0) {
+    analysis += `
+      <div class="analysis-item">
+        <h3>✅ 不需帮助小组 (${noHelp.length}个)</h3>
+        <p>第 ${noHelp.map(g => g.groupNum).join('、')} 组满分，掌握情况优秀。</p>
+        <div class="teaching-measure">
+          <strong>教学措施：</strong>可安排拓展任务或研究性学习。邀请这些组成员分享学习经验。
+        </div>
+      </div>
+    `;
+  }
+  
+  if (weakParams.length > 0) {
+    analysis += `
+      <div class="analysis-item">
+        <h3>🔧 薄弱知识点</h3>
+        <p>以下知识点掌握率不足70%，建议针对全体重新讲解：</p>
+        <ul style="margin: 15px 0 15px 20px;">
+          ${weakParams.map(p => `<li><strong>${p.label}</strong> (掌握率 ${p.rate}%)</li>`).join('')}
+        </ul>
+        <div class="teaching-measure">
+          <strong>教学措施：</strong>针对薄弱知识点设计专题教学环节。使用动态演示软件展示参数变化对函数图像的。增加课堂互动练习。
+        </div>
+      </div>
+    `;
+  }
+  
+  document.getElementById('analysisContent').innerHTML = analysis;
+}
+
+loadData();
+</script>
+
+</body>
+</html>
