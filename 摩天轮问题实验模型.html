@@ -306,13 +306,94 @@
             color: #7b2ff7;
         }
 
-        /* ============ Responsive ============ */
+        /* ============ Responsive: Tablet (max-width: 1400px) ============ */
+        @media (max-width: 1400px) {
+            .main-container {
+                grid-template-columns: 300px 1fr 480px;
+                width: 95%;
+                gap: 16px;
+            }
+        }
+
+        /* ============ Responsive: Small Tablet & Desktop (max-width: 1200px) ============ */
         @media (max-width: 1200px) {
             .main-container {
+                grid-template-columns: 280px 1fr;
+                width: 96%;
+                gap: 16px;
+            }
+            .canvas-wrapper {
+                grid-column: 1 / -1;
+                order: -1;
+            }
+            .canvas-wrapper canvas {
+                width: 100%;
+                height: auto;
+                max-height: 500px;
+            }
+            header h1 { font-size: 2.4rem; }
+        }
+
+        /* ============ Responsive: Mobile (max-width: 768px) ============ */
+        @media (max-width: 768px) {
+            .main-container {
                 grid-template-columns: 1fr;
+                width: 92%;
+                gap: 14px;
+                padding: 12px 0;
             }
             .canvas-wrapper { order: -1; }
-            .footer-grid { grid-template-columns: 1fr; }
+            .canvas-wrapper canvas {
+                width: 100%;
+                height: auto;
+                max-height: 60vh;
+            }
+            header { padding: 16px 0 12px; }
+            header h1 { font-size: 1.8rem; letter-spacing: 1px; }
+            header p.subtitle { font-size: 0.82rem; }
+
+            .card { padding: 18px; border-radius: 12px; }
+            .card h2 { font-size: 1rem; margin-bottom: 12px; padding-bottom: 6px; }
+
+            .result-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+            .result-item { padding: 14px 10px; }
+            .result-item .value { font-size: 1.3rem; }
+            .result-item.highlight-value .value { font-size: 1.5rem; }
+
+            .range-box .range-value { font-size: 1.1rem; }
+            .t-display .t-value { font-size: 1.5rem; }
+
+            .footer-grid { grid-template-columns: 1fr; gap: 14px; }
+            .footer-content { padding: 16px; }
+
+            .formula { font-size: 1.05rem; }
+            .formula .highlight { font-size: 1.1rem; }
+
+            #graphCanvas { width: 100% !important; height: auto !important; }
+        }
+
+        /* ============ Responsive: Small Mobile (max-width: 380px) ============ */
+        @media (max-width: 380px) {
+            header h1 { font-size: 1.4rem; }
+            .card { padding: 14px; }
+            .card h2 { font-size: 0.9rem; }
+            .result-item { padding: 10px 8px; }
+            .result-item .value { font-size: 1.1rem; }
+            .result-item .label { font-size: 0.78rem; }
+        }
+
+        /* ============ Mobile: Touch-friendly ============ */
+        @media (hover: none) and (pointer: coarse) {
+            input[type="range"] { height: 8px; }
+            input[type="range"]::-webkit-slider-thumb {
+                width: 26px;
+                height: 26px;
+                box-shadow: 0 0 10px rgba(0,212,255,0.7);
+            }
+            .btn-reset { padding: 14px; font-size: 1.1rem; }
+            .btn-pause { padding: 10px 20px; font-size: 1rem; }
+        }
+    </style> }
         }
     </style>
 </head>
@@ -1053,7 +1134,27 @@
         pauseBtn.textContent = '继续';
     });
 
+    // ========== Canvas Resize Handler ==========
+    function resizeCanvases() {
+        const containerWidth = ferrisCanvas.parentElement.clientWidth;
+        const maxWidth = Math.min(containerWidth, 500);
+        
+        // Ferris wheel canvas
+        const ferrisDisplayWidth = maxWidth;
+        const ferrisDisplayHeight = Math.round(ferrisDisplayWidth * (580 / 500));
+        ferrisCanvas.style.width = ferrisDisplayWidth + 'px';
+        ferrisCanvas.style.height = ferrisDisplayHeight + 'px';
+
+        // Graph canvas
+        const graphDisplayWidth = Math.min(containerWidth, 480);
+        const graphDisplayHeight = Math.round(graphDisplayWidth * (180 / 480));
+        graphCanvas.style.width = graphDisplayWidth + 'px';
+        graphCanvas.style.height = graphDisplayHeight + 'px';
+    }
+
     // ========== Start ==========
+    resizeCanvases();
+    window.addEventListener('resize', resizeCanvases);
     requestAnimationFrame(animate);
 
 })();
