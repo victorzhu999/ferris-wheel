@@ -86,7 +86,26 @@ h1 {
 .group-rankings {
   background: rgba(255,255,255,0.05);
   border-radius: 10px;
-  overflow: hidden;
+  overflow-y: auto;
+  max-height: 400px;
+}
+
+.group-rankings::-webkit-scrollbar {
+  width: 8px;
+}
+
+.group-rankings::-webkit-scrollbar-track {
+  background: rgba(255,255,255,0.05);
+  border-radius: 4px;
+}
+
+.group-rankings::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.2);
+  border-radius: 4px;
+}
+
+.group-rankings::-webkit-scrollbar-thumb:hover {
+  background: rgba(255,255,255,0.3);
 }
 
 .group-rank-item {
@@ -519,6 +538,35 @@ function renderRankings(groupRankings) {
       </div>
     `;
   }).join('');
+
+  autoScrollRankings();
+}
+
+function autoScrollRankings() {
+  const container = document.getElementById('rankings');
+  if (!container) return;
+  
+  let isPaused = false;
+  
+  container.addEventListener('mouseenter', () => { isPaused = true; });
+  container.addEventListener('mouseleave', () => { isPaused = false; });
+  container.addEventListener('touchstart', () => { isPaused = true; });
+  container.addEventListener('touchend', () => { isPaused = false; });
+  
+  const scroll = () => {
+    if (!isPaused) {
+      container.scrollTop += 1;
+      
+      if (container.scrollTop >= container.scrollHeight - container.clientHeight) {
+        setTimeout(() => {
+          container.scrollTo({ top: 0 });
+        }, 2000);
+      }
+    }
+    requestAnimationFrame(scroll);
+  };
+  
+  requestAnimationFrame(scroll);
 }
 
 function renderBarChart(groupRankings) {

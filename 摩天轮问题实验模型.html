@@ -1,0 +1,1062 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>摩天轮数学问题研究</title>
+    <style>
+        /* ============ Reset & Base ============ */
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+            color: #e0e0e0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: hidden;
+        }
+
+        /* ============ Header ============ */
+        header {
+            width: 100%;
+            text-align: center;
+            padding: 24px 0 16px;
+            background: rgba(255,255,255,0.04);
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            backdrop-filter: blur(10px);
+        }
+        header h1 {
+            font-size: 2.8rem;
+            font-weight: 700;
+            background: linear-gradient(90deg, #00d4ff, #7b2ff7, #ff6ac1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 2px;
+        }
+        header p.subtitle {
+            font-size: 0.95rem;
+            color: #999;
+            margin-top: 4px;
+        }
+
+        /* ============ Main Container ============ */
+        .main-container {
+            display: grid;
+            grid-template-columns: 320px 1fr 520px;
+            gap: 20px;
+            width: 95%;
+            max-width: 1500px;
+            padding: 24px 0;
+        }
+
+        /* ============ Card Style ============ */
+        .card {
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 16px;
+            padding: 24px;
+            backdrop-filter: blur(8px);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        }
+        .card h2 {
+            font-size: 1.1rem;
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid rgba(255,255,255,0.15);
+            color: #00d4ff;
+        }
+
+        /* ============ Left Panel: Controls & Formula ============ */
+        .left-panel { display: flex; flex-direction: column; gap: 20px; }
+
+        .control-group { margin-bottom: 20px; }
+        .control-group label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.95rem;
+            margin-bottom: 8px;
+        }
+        .control-group label span.value {
+            font-weight: 700;
+            color: #ff6ac1;
+            font-size: 1.1rem;
+            min-width: 40px;
+            text-align: right;
+        }
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: linear-gradient(90deg, #302b63, #7b2ff7);
+            outline: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #00d4ff;
+            cursor: pointer;
+            box-shadow: 0 0 8px rgba(0,212,255,0.6);
+            transition: transform 0.15s;
+        }
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        .btn-reset {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #7b2ff7, #ff6ac1);
+            color: #fff;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-reset:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(123,47,247,0.5);
+        }
+
+        /* Formula */
+        .formula-box {
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 10px;
+            padding: 16px;
+            margin-top: 8px;
+        }
+        .formula {
+            font-family: 'Cambria Math', 'Times New Roman', serif;
+            font-size: 1.25rem;
+            text-align: center;
+            margin: 8px 0;
+            color: #7bffb2;
+        }
+        .formula .highlight { color: #ff6ac1; font-weight: 700; }
+        .formula-desc {
+            font-size: 0.82rem;
+            color: #aaa;
+            line-height: 1.6;
+        }
+
+        /* ============ Center Panel: Results ============ */
+        .center-panel { display: flex; flex-direction: column; gap: 20px; }
+
+        .result-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+        .result-item {
+            background: rgba(0,0,0,0.25);
+            border-radius: 12px;
+            padding: 18px;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.08);
+            transition: border-color 0.3s;
+        }
+        .result-item:hover { border-color: rgba(0,212,255,0.4); }
+        .result-item .label {
+            font-size: 0.85rem;
+            color: #888;
+            margin-bottom: 6px;
+        }
+        .result-item .value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #00d4ff;
+            font-family: 'Courier New', monospace;
+        }
+        .result-item.highlight-value .value {
+            color: #ff6ac1;
+            font-size: 1.7rem;
+        }
+        .result-item .unit {
+            font-size: 0.8rem;
+            color: #666;
+            margin-left: 2px;
+        }
+
+        .range-box {
+            background: linear-gradient(135deg, rgba(0,212,255,0.1), rgba(123,47,247,0.1));
+            border: 1px solid rgba(0,212,255,0.3);
+            border-radius: 12px;
+            padding: 18px;
+            text-align: center;
+            margin-top: 6px;
+        }
+        .range-box .label { font-size: 0.9rem; color: #aaa; margin-bottom: 8px; }
+        .range-box .range-value {
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: #7bffb2;
+            font-family: 'Courier New', monospace;
+        }
+
+        .status-bar {
+            margin-top: 12px;
+            padding: 12px;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 0.95rem;
+            font-weight: 600;
+        }
+        .status-bar.above {
+            background: rgba(0,255,100,0.15);
+            color: #7bffb2;
+            border: 1px solid rgba(0,255,100,0.3);
+        }
+        .status-bar.below {
+            background: rgba(255,100,100,0.15);
+            color: #ff8a8a;
+            border: 1px solid rgba(255,100,100,0.3);
+        }
+
+        .t-display {
+            text-align: center;
+            padding: 10px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+        .t-display .t-label { font-size: 0.85rem; color: #888; }
+        .t-display .t-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #ffd700;
+            font-family: 'Courier New', monospace;
+        }
+
+        /* Animation speed control */
+        .speed-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 12px;
+        }
+        .speed-control label { font-size: 0.85rem; color: #aaa; white-space: nowrap; }
+        .speed-control input { flex: 1; }
+        .btn-pause {
+            padding: 6px 16px;
+            border: none;
+            border-radius: 6px;
+            background: rgba(255,255,255,0.1);
+            color: #e0e0e0;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn-pause:hover { background: rgba(255,255,255,0.2); }
+
+        /* ============ Right Panel: Canvas ============ */
+        .canvas-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        canvas {
+            border-radius: 12px;
+            background: linear-gradient(180deg, #1a1a3e 0%, #2d2b55 60%, #3d3b65 100%);
+        }
+
+        /* ============ Footer ============ */
+        footer {
+            width: 95%;
+            max-width: 1400px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .footer-content {
+            background: rgba(255,255,255,0.04);
+            border-radius: 12px;
+            padding: 20px 28px;
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+        .footer-content h3 {
+            font-size: 1rem;
+            color: #00d4ff;
+            margin-bottom: 12px;
+        }
+        .footer-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+        }
+        .footer-section h4 {
+            font-size: 0.9rem;
+            color: #ff6ac1;
+            margin-bottom: 6px;
+        }
+        .footer-section p, .footer-section li {
+            font-size: 0.82rem;
+            color: #999;
+            line-height: 1.6;
+        }
+        .footer-section ul { list-style: none; }
+        .footer-section ul li::before {
+            content: "▸ ";
+            color: #7b2ff7;
+        }
+
+        /* ============ Responsive ============ */
+        @media (max-width: 1200px) {
+            .main-container {
+                grid-template-columns: 1fr;
+            }
+            .canvas-wrapper { order: -1; }
+            .footer-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ============ Header ============ -->
+<header>
+    <h1>🎡 摩天轮数学问题研究</h1>
+    <p class="subtitle">探究三角函数在实际场景中的应用 —— 求解高度不等式</p>
+</header>
+
+<!-- ============ Main Content ============ -->
+<div class="main-container">
+
+    <!-- Left Panel: Controls & Formula -->
+    <div class="left-panel">
+        <div class="card">
+            <h2>⚙️ 参数控制</h2>
+            <div class="control-group">
+                <label>
+                    半径 r
+                    <span class="value" id="rValue">18</span>
+                </label>
+                <input type="range" id="rSlider" min="5" max="50" step="1" value="18">
+            </div>
+            <div class="control-group">
+                <label>
+                    底高 h
+                    <span class="value" id="hValue">5</span>
+                </label>
+                <input type="range" id="hSlider" min="5" max="50" step="1" value="5">
+            </div>
+            <div class="speed-control">
+                <label>动画速度</label>
+                <input type="range" id="speedSlider" min="0.1" max="5" step="0.1" value="1">
+                <button class="btn-pause" id="pauseBtn">继续</button>
+            </div>
+            <button class="btn-reset" id="resetBtn">🔄 重置默认值</button>
+        </div>
+
+        <div class="card">
+            <h2>📐 数学公式</h2>
+            <div class="formula-box">
+                <p class="formula">H = h + r − r·<span class="highlight">cos</span>(0.01t)</p>
+                <p class="formula-desc">
+                    H：座舱当前高度<br>
+                    r：摩天轮半径<br>
+                    h：最低点到地面高度<br>
+                    t：时间（毫秒）
+                </p>
+                <div style="border-top: 1px solid rgba(255,255,255,0.1); margin-top: 12px; padding-top: 12px;">
+                    <p class="formula">求解：<span class="highlight">H > 32</span></p>
+                    <p class="formula">周期 T = <span class="highlight">200π</span> ≈ 628.32 ms</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Center Panel: Results -->
+    <div class="center-panel">
+        <div class="card">
+            <h2>📊 计算结果</h2>
+            <div class="result-grid">
+                <div class="result-item">
+                    <div class="label">左临界值 a</div>
+                    <div class="value" id="resultA">--</div>
+                </div>
+                <div class="result-item">
+                    <div class="label">右临界值 b</div>
+                    <div class="value" id="resultB">--</div>
+                </div>
+                <div class="result-item highlight-value">
+                    <div class="label">时长差 b − a</div>
+                    <div class="value" id="resultDiff">--</div>
+                </div>
+                <div class="result-item">
+                    <div class="label">占比</div>
+                    <div class="value" id="resultRatio">--</div>
+                </div>
+            </div>
+            <div class="range-box">
+                <div class="label">t 的取值范围（满足 H > 32）</div>
+                <div class="range-value" id="resultRange">--</div>
+            </div>
+            <div class="status-bar below" id="statusBar">
+                座舱高度：计算中...
+            </div>
+            <div class="t-display">
+                <div class="t-label">当前时间 t</div>
+                <div class="t-value" id="currentT">0.00</div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>📈 高度-时间函数图像</h2>
+            <canvas id="graphCanvas" width="480" height="180" style="width:100%; border-radius:8px;"></canvas>
+        </div>
+    </div>
+
+    <!-- Right Panel: Visualization -->
+    <div class="canvas-wrapper">
+        <canvas id="ferrisCanvas" width="500" height="580"></canvas>
+    </div>
+</div>
+
+<!-- ============ Footer ============ -->
+<footer>
+    <div class="footer-content">
+        <h3>📖 说明与使用指南</h3>
+        <div class="footer-grid">
+            <div class="footer-section">
+                <h4>公式解析</h4>
+                <p>座舱高度 H 随时间 t 呈余弦函数变化。t=0 时座舱在最低点，随着时间推移匀速旋转。角速度 ω=0.01 rad/ms，故周期 T=2π/ω=200π≈628.32ms。</p>
+            </div>
+            <div class="footer-section">
+                <h4>使用说明</h4>
+                <ul>
+                    <li>拖动滑块调节半径 r 和底高 h</li>
+                    <li>实时观察不等式 H>32 的解</li>
+                    <li>画布展示摩天轮运动和高度曲线</li>
+                    <li>点击暂停/继续控制动画</li>
+                    <li>座舱高度超过32时变为绿色</li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>数学意义</h4>
+                <p>本题将三角函数与现实场景结合，通过求解余弦不等式，确定座舱处于某一高度以上的时间区间，体现了数学建模的思想。</p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- ============ JavaScript ============ -->
+<script>
+(function() {
+    'use strict';
+
+    // ========== DOM References ==========
+    const rSlider = document.getElementById('rSlider');
+    const hSlider = document.getElementById('hSlider');
+    const speedSlider = document.getElementById('speedSlider');
+    const pauseBtn = document.getElementById('pauseBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const rValueEl = document.getElementById('rValue');
+    const hValueEl = document.getElementById('hValue');
+    const resultAEl = document.getElementById('resultA');
+    const resultBEl = document.getElementById('resultB');
+    const resultDiffEl = document.getElementById('resultDiff');
+    const resultRatioEl = document.getElementById('resultRatio');
+    const resultRangeEl = document.getElementById('resultRange');
+    const statusBar = document.getElementById('statusBar');
+    const currentTEl = document.getElementById('currentT');
+
+    // ========== Canvas Setup ==========
+    const ferrisCanvas = document.getElementById('ferrisCanvas');
+    const fctx = ferrisCanvas.getContext('2d');
+    const graphCanvas = document.getElementById('graphCanvas');
+    const gctx = graphCanvas.getContext('2d');
+
+    // ========== State ==========
+    let r = 18;
+    let h = 5;
+    let speed = 1;
+    let paused = true;
+    let animTime = 0; // 当前动画时间 t
+    const T = 200 * Math.PI; // 周期 ≈ 628.32
+
+    // ========== Pre-computed Stars ==========
+    const stars = [];
+    for (let i = 0; i < 80; i++) {
+        stars.push({
+            x: Math.random(),
+            y: Math.random() * 0.75,
+            size: 0.5 + Math.random() * 1.5,
+            twinkle: Math.random() * Math.PI * 2
+        });
+    }
+
+    // ========== Calculation ==========
+    function calculate() {
+        const threshold = 32;
+        // H = h + r - r*cos(0.01t) > 32
+        // cos(0.01t) < (h + r - 32) / r
+        const C = (h + r - threshold) / r;
+
+        let a, b, hasSolution;
+
+        if (C >= 1) {
+            hasSolution = 'always';
+            a = 0;
+            b = T;
+        } else if (C <= -1) {
+            hasSolution = 'never';
+            a = null;
+            b = null;
+        } else {
+            const theta = Math.acos(C);
+            a = 100 * theta;
+            b = 100 * (2 * Math.PI - theta);
+            hasSolution = 'partial';
+        }
+
+        return { a, b, hasSolution, C };
+    }
+
+    // ========== Update Results ==========
+    function updateResults(currentH) {
+        const { a, b, hasSolution } = calculate();
+
+        if (hasSolution === 'always') {
+            resultAEl.textContent = '0.0000';
+            resultBEl.textContent = T.toFixed(4);
+            resultDiffEl.textContent = T.toFixed(4);
+            resultRatioEl.textContent = '100%';
+            resultRangeEl.textContent = `0 ≤ t ≤ ${T.toFixed(2)}`;
+            statusBar.textContent = '全程 H > 32 ✓';
+            statusBar.className = 'status-bar above';
+        } else if (hasSolution === 'never') {
+            resultAEl.textContent = '无解';
+            resultBEl.textContent = '无解';
+            resultDiffEl.textContent = '0 ms';
+            resultRatioEl.textContent = '0%';
+            resultRangeEl.textContent = '无满足条件的 t';
+            statusBar.textContent = `全程 H ≤ 32 ✗ (最大高度=${(h + 2 * r).toFixed(1)})`;
+            statusBar.className = 'status-bar below';
+        } else {
+            resultAEl.textContent = a.toFixed(4);
+            resultBEl.textContent = b.toFixed(4);
+            resultDiffEl.textContent = (b - a).toFixed(4);
+            const ratio = ((b - a) / T * 100).toFixed(2);
+            resultRatioEl.textContent = ratio + '%';
+            resultRangeEl.textContent = `${a.toFixed(2)} ≤ t ≤ ${b.toFixed(2)}`;
+
+            const inRange = (animTime >= a && animTime <= b);
+            if (inRange) {
+                statusBar.textContent = `✓ 当前 H = ${currentH.toFixed(2)} > 32`;
+                statusBar.className = 'status-bar above';
+            } else {
+                statusBar.textContent = `✗ 当前 H = ${currentH.toFixed(2)} ≤ 32`;
+                statusBar.className = 'status-bar below';
+            }
+        }
+
+        currentTEl.textContent = animTime.toFixed(2);
+    }
+
+    // ========== Draw Stars ==========
+    function drawStars(ctx, W, H, time) {
+        ctx.fillStyle = '#fff';
+        for (const star of stars) {
+            const alpha = 0.3 + 0.3 * Math.sin(star.twinkle + time * 0.001);
+            ctx.globalAlpha = alpha;
+            ctx.beginPath();
+            ctx.arc(star.x * W, star.y * H, star.size, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        ctx.globalAlpha = 1;
+    }
+
+    // ========== Draw Ferris Wheel ==========
+    function drawFerrisWheel() {
+        const W = ferrisCanvas.width;
+        const H = ferrisCanvas.height;
+        const ctx = fctx;
+        ctx.clearRect(0, 0, W, H);
+
+        // Background gradient (night sky)
+        const skyGrad = ctx.createLinearGradient(0, 0, 0, H);
+        skyGrad.addColorStop(0, '#0a0a2e');
+        skyGrad.addColorStop(0.6, '#141440');
+        skyGrad.addColorStop(1, '#1e1e50');
+        ctx.fillStyle = skyGrad;
+        ctx.fillRect(0, 0, W, H);
+
+        // Twinkling stars
+        drawStars(ctx, W, H, animTime);
+
+        // Layout calculations
+        const groundY = H - 50;
+        const wheelCenterX = W / 2;
+
+        // Dynamic scaling
+        const topHeight = h + 2 * r;
+        const availH = groundY - 50;
+        const currentScale = Math.min(availH / Math.max(topHeight, 40), 8);
+
+        const wheelCenterY = groundY - (h + r) * currentScale;
+        const drawR = r * currentScale;
+
+        // Support structure (A-frame)
+        ctx.strokeStyle = '#4a4a7a';
+        ctx.lineWidth = 4;
+        ctx.lineCap = 'round';
+        const baseSpread = Math.max(drawR * 0.5, 30);
+        // Left leg
+        ctx.beginPath();
+        ctx.moveTo(wheelCenterX - baseSpread, groundY);
+        ctx.lineTo(wheelCenterX - 5, wheelCenterY);
+        ctx.stroke();
+        // Right leg
+        ctx.beginPath();
+        ctx.moveTo(wheelCenterX + baseSpread, groundY);
+        ctx.lineTo(wheelCenterX + 5, wheelCenterY);
+        ctx.stroke();
+        // Cross beam
+        ctx.lineWidth = 2;
+        const midY = (wheelCenterY + groundY) / 2;
+        const leftX = wheelCenterX - baseSpread * 0.5;
+        const rightX = wheelCenterX + baseSpread * 0.5;
+        ctx.beginPath();
+        ctx.moveTo(leftX, midY);
+        ctx.lineTo(rightX, midY);
+        ctx.stroke();
+
+        // Base platform
+        ctx.fillStyle = '#3a3a6a';
+        ctx.fillRect(wheelCenterX - baseSpread - 15, groundY - 4, baseSpread * 2 + 30, 8);
+
+        // Ground
+        ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(10, groundY + 4);
+        ctx.lineTo(W - 10, groundY + 4);
+        ctx.stroke();
+
+        // Ground glow
+        const groundGlow = ctx.createLinearGradient(0, groundY, 0, groundY + 30);
+        groundGlow.addColorStop(0, 'rgba(100, 100, 150, 0.3)');
+        groundGlow.addColorStop(1, 'transparent');
+        ctx.fillStyle = groundGlow;
+        ctx.fillRect(0, groundY, W, 30);
+
+        // Height reference labels
+        ctx.fillStyle = 'rgba(255,255,255,0.35)';
+        ctx.font = '10px sans-serif';
+        ctx.textAlign = 'right';
+        for (let ht = 0; ht <= Math.ceil(topHeight); ht += 10) {
+            const labelY = groundY - ht * currentScale;
+            if (labelY > 30 && labelY < groundY - 10) {
+                ctx.fillText(ht.toString(), 28, labelY + 3);
+                ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+                ctx.beginPath();
+                ctx.moveTo(33, labelY);
+                ctx.lineTo(W - 15, labelY);
+                ctx.stroke();
+            }
+        }
+        ctx.textAlign = 'left';
+
+        // Threshold line H=32
+        const threshY = groundY - 32 * currentScale;
+        if (threshY > 20 && threshY < groundY) {
+            // Glow
+            ctx.strokeStyle = 'rgba(255, 106, 193, 0.3)';
+            ctx.lineWidth = 6;
+            ctx.beginPath();
+            ctx.moveTo(40, threshY);
+            ctx.lineTo(W - 40, threshY);
+            ctx.stroke();
+            // Line
+            ctx.strokeStyle = 'rgba(255, 106, 193, 0.8)';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([10, 5]);
+            ctx.beginPath();
+            ctx.moveTo(40, threshY);
+            ctx.lineTo(W - 40, threshY);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            ctx.fillStyle = '#ff6ac1';
+            ctx.font = 'bold 13px sans-serif';
+            ctx.textAlign = 'left';
+            ctx.fillText('H = 32', W - 95, threshY - 8);
+        }
+
+        // Wheel outer glow
+        ctx.save();
+        ctx.shadowColor = '#7b2ff7';
+        ctx.shadowBlur = 40;
+        ctx.beginPath();
+        ctx.arc(wheelCenterX, wheelCenterY, drawR, 0, Math.PI * 2);
+        ctx.strokeStyle = 'rgba(123, 47, 247, 0.3)';
+        ctx.lineWidth = 8;
+        ctx.stroke();
+        ctx.restore();
+
+        // Wheel rim
+        ctx.beginPath();
+        ctx.arc(wheelCenterX, wheelCenterY, drawR, 0, Math.PI * 2);
+        ctx.strokeStyle = '#8a8aff';
+        ctx.lineWidth = 3;
+        ctx.stroke();
+
+        // Inner ring
+        ctx.beginPath();
+        ctx.arc(wheelCenterX, wheelCenterY, drawR * 0.85, 0, Math.PI * 2);
+        ctx.strokeStyle = 'rgba(138, 138, 255, 0.15)';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+
+        // Spokes with rotation effect
+        const spokeRotation = 0.01 * animTime;
+        ctx.strokeStyle = 'rgba(138, 138, 255, 0.25)';
+        ctx.lineWidth = 1;
+        for (let i = 0; i < 12; i++) {
+            const angle = (i * Math.PI) / 6 + spokeRotation * 0.5;
+            ctx.beginPath();
+            ctx.moveTo(wheelCenterX, wheelCenterY);
+            ctx.lineTo(
+                wheelCenterX + drawR * Math.cos(angle),
+                wheelCenterY + drawR * Math.sin(angle)
+            );
+            ctx.stroke();
+        }
+
+        // Decorative lights on wheel
+        for (let i = 0; i < 16; i++) {
+            const angle = (i * Math.PI) / 8;
+            const lx = wheelCenterX + drawR * Math.cos(angle);
+            const ly = wheelCenterY + drawR * Math.sin(angle);
+            const brightness = 0.4 + 0.6 * Math.abs(Math.sin(0.003 * animTime + i));
+            ctx.beginPath();
+            ctx.arc(lx, ly, 2, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(255, 200, 100, ${brightness})`;
+            ctx.fill();
+        }
+
+        // Center hub
+        const hubGrad = ctx.createRadialGradient(wheelCenterX, wheelCenterY, 0, wheelCenterX, wheelCenterY, 8);
+        hubGrad.addColorStop(0, '#b8b8ff');
+        hubGrad.addColorStop(1, '#5a5a9a');
+        ctx.beginPath();
+        ctx.arc(wheelCenterX, wheelCenterY, 7, 0, Math.PI * 2);
+        ctx.fillStyle = hubGrad;
+        ctx.fill();
+        ctx.strokeStyle = '#fff';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+
+        // Cabin position calculation
+        const cabinAngle = Math.PI + 0.01 * animTime;
+        const cabinX = wheelCenterX + drawR * Math.cos(cabinAngle);
+        const cabinY = wheelCenterY + drawR * Math.sin(cabinAngle);
+
+        // Current height
+        const currentH = h + r - r * Math.cos(0.01 * animTime);
+        const aboveThresh = currentH > 32;
+
+        // Cabin glow ring
+        ctx.save();
+        ctx.shadowColor = aboveThresh ? '#00ff88' : '#00d4ff';
+        ctx.shadowBlur = 25;
+        ctx.beginPath();
+        ctx.arc(cabinX, cabinY, 12, 0, Math.PI * 2);
+        ctx.strokeStyle = aboveThresh ? 'rgba(0,255,136,0.3)' : 'rgba(0,212,255,0.3)';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        ctx.restore();
+
+        // Cabin body
+        ctx.beginPath();
+        ctx.arc(cabinX, cabinY, 8, 0, Math.PI * 2);
+        const cabinGrad = ctx.createRadialGradient(cabinX - 2, cabinY - 2, 0, cabinX, cabinY, 8);
+        if (aboveThresh) {
+            cabinGrad.addColorStop(0, '#88ffbb');
+            cabinGrad.addColorStop(1, '#00cc66');
+        } else {
+            cabinGrad.addColorStop(0, '#66eeff');
+            cabinGrad.addColorStop(1, '#0099cc');
+        }
+        ctx.fillStyle = cabinGrad;
+        ctx.fill();
+        ctx.strokeStyle = '#fff';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // Cabin highlight
+        ctx.beginPath();
+        ctx.arc(cabinX - 2, cabinY - 2, 3, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(255,255,255,0.4)';
+        ctx.fill();
+
+        // Height indicator line
+        ctx.strokeStyle = 'rgba(255,255,255,0.25)';
+        ctx.lineWidth = 1;
+        ctx.setLineDash([3, 3]);
+        ctx.beginPath();
+        ctx.moveTo(cabinX, cabinY);
+        ctx.lineTo(cabinX, groundY);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        // Height label near cabin
+        ctx.fillStyle = aboveThresh ? '#00ff88' : '#ff8a8a';
+        ctx.font = 'bold 12px sans-serif';
+        ctx.textAlign = 'left';
+        const labelOffX = cabinX + 15 > W - 50 ? -70 : 15;
+        ctx.fillText(`H=${currentH.toFixed(1)}`, cabinX + labelOffX, cabinY + 4);
+
+        // Info panel
+        ctx.fillStyle = 'rgba(0,0,0,0.5)';
+        ctx.fillRect(8, 8, 175, 52);
+        ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+        ctx.strokeRect(8, 8, 175, 52);
+        
+        ctx.fillStyle = '#00d4ff';
+        ctx.font = 'bold 12px sans-serif';
+        ctx.textAlign = 'left';
+        ctx.fillText(`r = ${r}    h = ${h}`, 16, 26);
+        ctx.fillStyle = 'rgba(255,255,255,0.6)';
+        ctx.font = '11px sans-serif';
+        ctx.fillText(`周期 T = ${T.toFixed(1)} ms`, 16, 44);
+
+        // Angle indicator arc
+        const arcAngle = Math.min(0.01 * animTime, Math.PI * 2);
+        ctx.strokeStyle = aboveThresh ? 'rgba(0, 255, 136, 0.3)' : 'rgba(0, 212, 255, 0.3)';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.arc(wheelCenterX, wheelCenterY, drawR * 0.3, Math.PI, Math.PI + arcAngle);
+        ctx.stroke();
+    }
+
+    // ========== Draw H-t Graph ==========
+    function drawGraph() {
+        const W = graphCanvas.width;
+        const H = graphCanvas.height;
+        const ctx = gctx;
+        ctx.clearRect(0, 0, W, H);
+
+        const pad = { top: 12, right: 15, bottom: 24, left: 40 };
+        const graphW = W - pad.left - pad.right;
+        const graphH = H - pad.top - pad.bottom;
+
+        // Background
+        ctx.fillStyle = 'rgba(10, 10, 30, 0.8)';
+        ctx.fillRect(0, 0, W, H);
+
+        // Determine y range
+        const minH = Math.max(0, h);
+        const maxH = h + 2 * r;
+        const rangeH = maxH - minH || 1;
+        const maxY = Math.ceil((maxH + 10) / 10) * 10;
+
+        function toX(t) { return pad.left + (t / T) * graphW; }
+        function toY(height) { return pad.top + (1 - (height - minH) / rangeH) * graphH; }
+
+        // Grid lines
+        ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+        ctx.lineWidth = 1;
+        for (let i = 0; i <= 4; i++) {
+            const x = pad.left + (i / 4) * graphW;
+            ctx.beginPath();
+            ctx.moveTo(x, pad.top);
+            ctx.lineTo(x, pad.top + graphH);
+            ctx.stroke();
+        }
+        for (let i = 0; i <= 4; i++) {
+            const y = pad.top + (i / 4) * graphH;
+            ctx.beginPath();
+            ctx.moveTo(pad.left, y);
+            ctx.lineTo(pad.left + graphW, y);
+            ctx.stroke();
+        }
+
+        // Threshold line H=32
+        if (32 >= minH && 32 <= maxH) {
+            ctx.strokeStyle = 'rgba(255, 106, 193, 0.6)';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([6, 3]);
+            ctx.beginPath();
+            ctx.moveTo(pad.left, toY(32));
+            ctx.lineTo(pad.left + graphW, toY(32));
+            ctx.stroke();
+            ctx.setLineDash([]);
+            ctx.fillStyle = '#ff6ac1';
+            ctx.font = 'bold 10px sans-serif';
+            ctx.textAlign = 'right';
+            ctx.fillText('H=32', pad.left + graphW - 3, toY(32) - 4);
+        }
+
+        // Solution region shading
+        const { hasSolution } = calculate();
+        if (hasSolution === 'partial') {
+            const { a, b } = calculate();
+            ctx.fillStyle = 'rgba(0, 255, 136, 0.08)';
+            ctx.fillRect(toX(a), pad.top, toX(b) - toX(a), graphH);
+        }
+
+        // Draw H(t) curve
+        ctx.beginPath();
+        ctx.strokeStyle = '#00d4ff';
+        ctx.lineWidth = 2.5;
+        const steps = 400;
+        for (let i = 0; i <= steps; i++) {
+            const t = (i / steps) * T;
+            const height = h + r - r * Math.cos(0.01 * t);
+            const x = toX(t);
+            const y = toY(Math.min(height, maxH));
+            if (i === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+
+        // Current position marker
+        const currH = h + r - r * Math.cos(0.01 * animTime);
+        const currX = toX(animTime);
+        const currY = toY(Math.min(currH, maxH));
+        
+        // Vertical dashed line
+        ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+        ctx.lineWidth = 1;
+        ctx.setLineDash([3, 3]);
+        ctx.beginPath();
+        ctx.moveTo(currX, currY);
+        ctx.lineTo(currX, pad.top + graphH);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        // Marker dot
+        ctx.beginPath();
+        ctx.arc(currX, currY, 5, 0, Math.PI * 2);
+        ctx.fillStyle = currH > 32 ? '#00ff88' : '#00d4ff';
+        ctx.fill();
+        ctx.strokeStyle = '#fff';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // Axis labels
+        ctx.fillStyle = 'rgba(255,255,255,0.5)';
+        ctx.font = '10px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('0', pad.left, pad.top + graphH + 13);
+        ctx.fillText('T', pad.left + graphW, pad.top + graphH + 13);
+        ctx.fillText('t (ms)', pad.left + graphW / 2, pad.top + graphH + 22);
+
+        ctx.textAlign = 'right';
+        ctx.fillText(maxH.toString(), pad.left - 5, pad.top + 8);
+        ctx.fillText(minH.toString(), pad.left - 5, pad.top + graphH + 4);
+
+        // a, b markers
+        if (hasSolution === 'partial') {
+            const { a, b } = calculate();
+            const ax = toX(a);
+            const bx = toX(b);
+
+            // Vertical lines at a and b
+            ctx.strokeStyle = 'rgba(255, 106, 193, 0.3)';
+            ctx.lineWidth = 1;
+            ctx.setLineDash([4, 4]);
+            ctx.beginPath();
+            ctx.moveTo(ax, pad.top);
+            ctx.lineTo(ax, pad.top + graphH);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(bx, pad.top);
+            ctx.lineTo(bx, pad.top + graphH);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // Markers
+            ctx.fillStyle = '#ff6ac1';
+            ctx.font = 'bold 11px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('a', ax, pad.top + graphH + 13);
+            ctx.fillText('b', bx, pad.top + graphH + 13);
+
+            // Intersection dots
+            ctx.beginPath();
+            ctx.arc(ax, toY(32), 4, 0, Math.PI * 2);
+            ctx.fillStyle = '#ff6ac1';
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(bx, toY(32), 4, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        // Border
+        ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(pad.left, pad.top, graphW, graphH);
+    }
+
+    // ========== Main Animation Loop ==========
+    let lastTimestamp = null;
+
+    function animate(timestamp) {
+        if (!lastTimestamp) lastTimestamp = timestamp;
+        const delta = (timestamp - lastTimestamp) / 1000;
+        lastTimestamp = timestamp;
+
+        if (!paused) {
+            animTime += delta * 60 * speed;
+            if (animTime >= T) {
+                animTime = animTime % T;
+            }
+        }
+
+        const currentH = h + r - r * Math.cos(0.01 * animTime);
+        drawFerrisWheel();
+        drawGraph();
+        updateResults(currentH);
+
+        requestAnimationFrame(animate);
+    }
+
+    // ========== Event Listeners ==========
+    rSlider.addEventListener('input', function() {
+        r = parseInt(this.value);
+        rValueEl.textContent = r;
+    });
+
+    hSlider.addEventListener('input', function() {
+        h = parseInt(this.value);
+        hValueEl.textContent = h;
+    });
+
+    speedSlider.addEventListener('input', function() {
+        speed = parseFloat(this.value);
+    });
+
+    pauseBtn.addEventListener('click', function() {
+        paused = !paused;
+        this.textContent = paused ? '继续' : '暂停';
+    });
+
+    resetBtn.addEventListener('click', function() {
+        r = 18;
+        h = 5;
+        speed = 1;
+        animTime = 0;
+        rSlider.value = 18;
+        hSlider.value = 5;
+        speedSlider.value = 1;
+        rValueEl.textContent = 18;
+        hValueEl.textContent = 5;
+        paused = true;
+        pauseBtn.textContent = '继续';
+    });
+
+    // ========== Start ==========
+    requestAnimationFrame(animate);
+
+})();
+</script>
+</body>
+</html>
