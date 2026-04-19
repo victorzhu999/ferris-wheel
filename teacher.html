@@ -41,10 +41,30 @@ h1 {
 }
 
 .overview {
-  display: grid;
+  display: none;
   grid-template-columns: repeat(4, 1fr);
   gap: 10px;
   flex-shrink: 0;
+}
+
+@media (max-width: 768px) {
+  .overview { grid-template-columns: repeat(2, 1fr); gap: 6px; }
+}
+
+@media (max-width: 400px) {
+  .overview { grid-template-columns: repeat(2, 1fr); }
+}
+
+.main-grid {
+  display: none;
+  grid-template-columns: 1fr 1fr 1.2fr;
+  gap: 10px;
+  flex: 1;
+  min-height: 0;
+}
+
+@media (max-width: 768px) {
+  .main-grid { grid-template-columns: 1fr; }
 }
 
 .overview-item {
@@ -139,6 +159,34 @@ h1 {
 .error { text-align: center; padding: 50px; color: #ff6b6b; }
 .group-tab { padding: 3px 8px; border: 1px solid rgba(255,255,255,0.2); background: transparent; color: #fff; border-radius: 4px; cursor: pointer; font-size: 0.75em; }
 .group-tab.active { background: #48dbfb; border-color: #48dbfb; color: #000; }
+
+@media (max-width: 768px) {
+  body { height: auto; overflow-y: auto; padding: 10px; }
+  .container { height: auto; gap: 8px; }
+  .overview { display: none; grid-template-columns: repeat(2, 1fr); gap: 6px; }
+  .main-grid { display: none; grid-template-columns: 1fr; }
+  h1 { font-size: 1.2em; margin-bottom: 4px; }
+  .overview-item { padding: 8px; }
+  .overview-item .label { font-size: 0.7em; }
+  .overview-item .value { font-size: 1.4em; }
+  .bar-chart { max-height: 200px; overflow-y: auto; }
+  .analysis-box { max-height: 200px; overflow-y: auto; }
+  .group-rankings { max-height: 250px; overflow-y: auto; }
+  .group-rank-details { display: none; }
+  .knowledge-grid { grid-template-columns: repeat(2, 1fr); }
+  .levels-grid { grid-template-columns: repeat(3, 1fr); }
+  .level-box { padding: 6px; }
+  .level-title { font-size: 0.75em; }
+  .level-count { font-size: 1em; }
+  .bar-label { min-width: 40px; font-size: 0.8em; }
+  .bar-track { height: 18px; }
+}
+
+@media (max-width: 400px) {
+  .overview { grid-template-columns: repeat(2, 1fr); }
+  .levels-grid { grid-template-columns: 1fr; }
+  .knowledge-grid { grid-template-columns: 1fr; }
+}
 </style>
 </head>
 <body>
