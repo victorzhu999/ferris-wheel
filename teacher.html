@@ -104,8 +104,9 @@ h1 {
 
 .group-rankings {
   flex: 1;
-  overflow-y: auto;
+  overflow: hidden;
   min-height: 0;
+  transition: all 0.5s ease;
 }
 
 .group-rank-item {
@@ -171,7 +172,7 @@ h1 {
   .overview-item .value { font-size: 1.4em; }
   .bar-chart { max-height: 200px; overflow-y: auto; }
   .analysis-box { max-height: 200px; overflow-y: auto; }
-  .group-rankings { max-height: 250px; overflow-y: auto; }
+  .group-rankings { overflow: hidden; max-height: 250px; }
   .group-rank-details { display: none; }
   .knowledge-grid { grid-template-columns: repeat(2, 1fr); }
   .levels-grid { grid-template-columns: repeat(3, 1fr); }
@@ -297,12 +298,29 @@ function renderOverview(groupRankings) {
     <div class="overview-item"><div class="label">满分小组数</div><div class="value green">${fullMarkGroups}</div></div>`;
 }
 
+let rankingsData = [];
+let rankingTimer = null;
+
 function renderRankings(groupRankings) {
-  document.getElementById('rankings').innerHTML = groupRankings.map((g, i) => {
-    const medal = i===0?'🥇':i===1?'🥈':i===2?'🥉':'';
+  rankingsData = [...groupRankings];
+  updateRankingsDOM();
+  if (rankingTimer) clearInterval(rankingTimer);
+  if (rankingsData.length > 1) {
+    rankingTimer = setInterval(() => {
+      const first = rankingsData.shift();
+      rankingsData.push(first);
+      updateRankingsDOM();
+    }, 3000);
+  }
+}
+
+function updateRankingsDOM() {
+  const html = rankingsData.map((g, i) => {
+    const medal = i===0?'':i===1?'🥈':i===2?'🥉':'';
     const sClass = g.avgScore>=100?'excellent':g.avgScore>=50?'good':'poor';
     return `<div class="group-rank-item"><span class="rank-pos">${i+1}</span><span class="rank-group-name">第 ${g.groupNum} 组 ${medal}</span><span class="rank-score ${sClass}">${g.avgScore}分</span><div class="group-rank-details"><span>人数:${g.studentCount}</span><span>最高:${g.maxScore}</span><span>最低:${g.minScore}</span></div></div>`;
   }).join('');
+  document.getElementById('rankings').innerHTML = html;
 }
 
 function renderBarChart(groupRankings) {
