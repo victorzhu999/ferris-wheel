@@ -106,7 +106,32 @@ h1 {
   flex: 1;
   overflow: hidden;
   min-height: 0;
-  transition: all 0.5s ease;
+  position: relative;
+}
+
+.rankings-viewport {
+  overflow: hidden;
+  height: 100%;
+  width: 100%;
+}
+
+.rankings-track {
+  will-change: transform;
+  animation: marquee 12s linear infinite;
+}
+
+.rankings-track:hover {
+  animation-play-state: paused;
+}
+
+@media (max-width: 768px) {
+  .rankings-viewport { max-height: 250px; }
+  .rankings-track { animation-duration: 10s; }
+}
+
+@keyframes marquee {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(-50%); }
 }
 
 .group-rank-item {
@@ -304,23 +329,20 @@ let rankingTimer = null;
 function renderRankings(groupRankings) {
   rankingsData = [...groupRankings];
   updateRankingsDOM();
-  if (rankingTimer) clearInterval(rankingTimer);
-  if (rankingsData.length > 1) {
-    rankingTimer = setInterval(() => {
-      const first = rankingsData.shift();
-      rankingsData.push(first);
-      updateRankingsDOM();
-    }, 3000);
-  }
+}
+
+function buildRankItems(data) {
+  return data.map((g, i) => {
+    const isTop3 = i < 3;
+    const m = isTop3 && i > 0 ? ['',''][i-1] : '';
+    const sClass = g.avgScore>=100?'excellent':g.avgScore>=50?'good':'poor';
+    return `<div class="group-rank-item"><span class="rank-pos">${i+1}</span><span class="rank-group-name">第 ${g.groupNum} 组 ${m}</span><span class="rank-score ${sClass}">${g.avgScore}分</span><div class="group-rank-details"><span>人数:${g.studentCount}</span><span>最高:${g.maxScore}</span><span>最低:${g.minScore}</span></div></div>`;
+  }).join('');
 }
 
 function updateRankingsDOM() {
-  const html = rankingsData.map((g, i) => {
-    const medal = i===0?'':i===1?'🥈':i===2?'🥉':'';
-    const sClass = g.avgScore>=100?'excellent':g.avgScore>=50?'good':'poor';
-    return `<div class="group-rank-item"><span class="rank-pos">${i+1}</span><span class="rank-group-name">第 ${g.groupNum} 组 ${medal}</span><span class="rank-score ${sClass}">${g.avgScore}分</span><div class="group-rank-details"><span>人数:${g.studentCount}</span><span>最高:${g.maxScore}</span><span>最低:${g.minScore}</span></div></div>`;
-  }).join('');
-  document.getElementById('rankings').innerHTML = html;
+  const items = buildRankItems(rankingsData) + buildRankItems(rankingsData);
+  document.getElementById('rankings').innerHTML = `<div class="rankings-viewport"><div class="rankings-track">${items}</div></div>`;
 }
 
 function renderBarChart(groupRankings) {
